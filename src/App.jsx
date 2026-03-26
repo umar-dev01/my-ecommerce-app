@@ -10,8 +10,8 @@ import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
-// import TaskManager from "./practice/TaskManager";
 import { CartProvider } from "./context/CartContext";
+
 function App() {
   return (
     <AuthProvider>
@@ -20,9 +20,12 @@ function App() {
           <Routes>
             {/* Pages WITH Navbar */}
             <Route element={<Layout />}>
+              {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:id" element={<ProductDetails />} />
+
+              {/* Protected Routes */}
               <Route
                 path="/cart"
                 element={

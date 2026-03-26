@@ -53,6 +53,12 @@ function Register() {
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
         {/* Title */}
+        <button
+          onClick={() => navigate("/")}
+          className="text-purple-800 font-bold mb-6 hover:text-pink-600 transition"
+        >
+          ← Back to Products
+        </button>
         <h1 className="text-3xl font-bold text-center text-indigo-800 mb-2">
           Create Account 🚀
         </h1>

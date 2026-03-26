@@ -19,10 +19,11 @@ function Login() {
       return;
     }
     const results = await login(email, password);
-    if (!results.success) {
-      // navigate("/");
+    if (results.success) {
+      navigate("/");
     } else {
       setLocalError(results.error);
+      alert("wrong");
     }
   }
   // if (isLoggedIn) {
@@ -49,6 +50,12 @@ function Login() {
     <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
         {/* Title */}
+        <button
+          onClick={() => navigate("/")}
+          className="text-purple-800 font-bold mb-6 hover:text-pink-600 transition"
+        >
+          ← Back to Products
+        </button>
         <h1 className="text-3xl font-bold text-center text-purple-800 mb-2">
           Welcome Back 👋
         </h1>
