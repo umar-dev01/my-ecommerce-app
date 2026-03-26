@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-
+import { CartContext } from "../context/CartContext";
 function ProductDetails() {
+  const { dispatch, ACTIONS } = useContext(CartContext);
   const { id } = useParams(); // reads id from URL
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
@@ -86,7 +87,20 @@ function ProductDetails() {
               ${product.price}
             </p>
             <p className="text-gray-600 mb-6">{product.description}</p>
-            <button className="w-full bg-pink-600 text-white py-3 rounded-lg hover:bg-pink-700 transition font-bold">
+            <button
+              onClick={() =>
+                dispatch({
+                  type: ACTIONS.ADD_ITEM,
+                  payload: {
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.images[1],
+                  },
+                })
+              }
+              className="w-full bg-pink-600 text-white py-3 rounded-lg hover:bg-pink-700 transition font-bold"
+            >
               Add to Cart 🛒
             </button>
           </div>

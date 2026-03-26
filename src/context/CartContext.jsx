@@ -18,7 +18,7 @@ const ACTIONS = {
 function cartReducer(state, action) {
   //first
   function calculateShipping(totalPrice) {
-    return totalPrice < 50 ? 5.99 : 0;
+    return totalPrice < 50 && totalPrice > 0 ? 5.99 : 0;
   }
   switch (action.type) {
     case ACTIONS.ADD_ITEM: {

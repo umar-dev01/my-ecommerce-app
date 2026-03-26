@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { CartContext } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import Cart from "../pages/Cart";
 function ProductCard({ id, name, price, image }) {
-  const [isInCart, setIsInCart] = useState(false);
-  const [quantity, setQuantity] = useState(1);
+  const { dispatch, ACTIONS } = useContext(CartContext);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const navigate = useNavigate();
   function handleWishlist() {
@@ -10,17 +11,16 @@ function ProductCard({ id, name, price, image }) {
   }
 
   function handleAddToCart() {
-    setIsInCart(true);
-    console.log(`Added ${quantity} x ${name} to cart`);
+    dispatch({
+      type: ACTIONS.ADD_ITEM,
+      payload: { id, name, price, image },
+    });
+    console.log(`Added ${name} to cart`);
   }
   function handleViewDetails() {
     navigate(`/products/${id}`); // ← ADD THIS
   }
-  function handleRemoveFromCart() {
-    setIsInCart(false);
-    setQuantity(1);
-  }
-  const formattedPrice = Number(price).toFixed(2);
+  const formatedPrice = Number(price).toFixed(2);
   return (
     <div className="border rounded-lg p-4 shadow-md hover:shadow-lg transition">
       <img
@@ -34,7 +34,7 @@ function ProductCard({ id, name, price, image }) {
         }}
       />
       <h3 className="text-xl font-bold mt-2">{name}</h3>
-      <p className="text-lg text-pink-600">${formattedPrice}</p>
+      <p className="text-lg text-pink-600">${formatedPrice}</p>
 
       <div className="flex justify-between">
         <div className="flex items-center mt-3">
@@ -44,7 +44,7 @@ function ProductCard({ id, name, price, image }) {
           >
             -
           </button>
-          <span className="bg-gray-100 px-4 py-1">{quantity}</span>
+          <span className="bg-gray-100 px-4 py-1">{Cart.quantity}</span>
           <button
             onClick={() => setQuantity(quantity + 1)}
             className="bg-gray-200 px-3 py-1 rounded-r"
@@ -63,21 +63,12 @@ function ProductCard({ id, name, price, image }) {
         </div>
       </div>
 
-      {!isInCart ? (
-        <button
-          onClick={handleAddToCart}
-          className="bg-pink-600 text-white px-4 py-2 rounded mt-3 w-full hover:bg-pink-700"
-        >
-          Add to Cart
-        </button>
-      ) : (
-        <button
-          onClick={handleRemoveFromCart}
-          className="bg-green-600 text-white px-4 py-2 rounded mt-3 w-full hover:bg-green-700"
-        >
-          ✓ Added (Remove)
-        </button>
-      )}
+      <button
+        onClick={handleAddToCart}
+        className="bg-pink-600 text-white px-4 py-2 rounded mt-3 w-full hover:bg-pink-700"
+      >
+        Add to Cart 🛒
+      </button>
     </div>
   );
 }

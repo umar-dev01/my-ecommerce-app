@@ -10,7 +10,6 @@ function Navbar() {
         <Link to="/" className="text-2xl font-bold text-pink-400">
           Hekto
         </Link>
-
         {/* Navigation Links */}
         <div className="flex gap-8">
           <Link to="/" className="hover:text-pink-400 transition">
@@ -20,7 +19,7 @@ function Navbar() {
             Products
           </Link>
           <Link to="/cart" className="hover:text-pink-400 transition">
-            Cart
+            Cart ({cart.totalItems} {console.log(cart)})
           </Link>
           <Link to="/login" className="hover:text-pink-400 transition">
             Login
