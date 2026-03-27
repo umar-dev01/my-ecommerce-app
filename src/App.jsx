@@ -11,10 +11,11 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import { CartProvider } from "./context/CartContext";
-
+// import PerformanceExample from "./practice/PerformanceExample";
 function App() {
   return (
     <AuthProvider>
+      {/* <PerformanceExample /> */}
       <CartProvider>
         <BrowserRouter>
           <Routes>
