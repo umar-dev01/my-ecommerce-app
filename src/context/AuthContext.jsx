@@ -36,9 +36,9 @@ export function AuthProvider({ children }) {
       const data = await res.json();
       setUser(data.data.user);
       setError(null);
-      console.log("✅ User fetched:", data.data.user);
+      
     } catch (err) {
-      console.log("❌ Fetch error:", err);
+      
       setUser(null);
       setToken(null);
       localStorage.removeItem("token");
@@ -54,13 +54,13 @@ export function AuthProvider({ children }) {
       setIsLoading(true);
       setError(null);
 
-      console.log("📤 Logging in with:", { email, password });
+      
 
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/v1/user/login`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" }, // ✅ FIXED: underscore to hyphen
+          headers: { "Content-Type": "application/json" }, 
           body: JSON.stringify({ email, password }),
         },
       );
@@ -78,10 +78,9 @@ export function AuthProvider({ children }) {
 
       await fetchUserData(newToken);
 
-      console.log("✅ Login successful!");
-      return { success: true }; // ✅ FIXED: Added return statement
+      
+      return { success: true }; 
     } catch (err) {
-      console.error("❌ Login error:", err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -123,12 +122,10 @@ export function AuthProvider({ children }) {
 
       await fetchUserData(newToken);
 
-      console.log("✅ Registration successful!");
-      return { success: true }; // ✅ FIXED: Added return statement
+      return { success: true }; 
     } catch (err) {
-      console.error("❌ Register error:", err);
       setError(err.message);
-      return { success: false, error: err.message }; // ✅ FIXED: Added return statement
+      return { success: false, error: err.message }; 
     } finally {
       setIsLoading(false);
     }

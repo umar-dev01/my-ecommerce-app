@@ -1,49 +1,51 @@
 import { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
+import useFetch from "../hooks/useFetch";
 
 function ProductList({ searchQuery }) {
+  const {
+    data: products,
+    isLoading,
+    error,
+  } = useFetch(`${import.meta.env.VITE_API_URL}/api/v1/products`);
   // State for products
-  const [products, setProducts] = useState([]);
+  // const [products, setProducts] = useState([]);
 
   // State for loading (show spinner)
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
 
   // State for errors
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
 
   // FETCH products when component loads
   useEffect(() => {
     // Create a function to fetch data
     async function fetchProducts() {
-      try {
-        // Start loading
-        setIsLoading(true);
-
-        // Clear any old errors
-        setError(null);
-
-        // FETCH from API
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/v1/products`,
-        );
-        // Check if response is OK
-        if (!response.ok) {
-          throw new Error("Failed to fetch products");
-        }
-
-        // Convert response to JSON
-        const data = await response.json();
-
-        // Update state with products
-        setProducts(data.products);
-      } catch (err) {
-        // Handle any errors
-        setError(err.message);
-        console.error("Error fetching:", err);
-      } finally {
-        // Stop loading (whether success or error)
-        setIsLoading(false);
-      }
+      // try {
+      //   // Start loading
+      //   setIsLoading(true);
+      //   // Clear any old errors
+      //   setError(null);
+      //   // FETCH from API
+      //   const response = await fetch(
+      //     `${import.meta.env.VITE_API_URL}/api/v1/products`,
+      //   );
+      //   // Check if response is OK
+      //   if (!response.ok) {
+      //     throw new Error("Failed to fetch products");
+      //   }
+      //   // Convert response to JSON
+      //   const data = await response.json();
+      //   // Update state with products
+      //   setProducts(data.products);
+      // } catch (err) {
+      //   // Handle any errors
+      //   setError(err.message);
+      //   console.error("Error fetching:", err);
+      // } finally {
+      //   // Stop loading (whether success or error)
+      //   setIsLoading(false);
+      // }
     }
 
     // Call the function
@@ -73,6 +75,9 @@ function ProductList({ searchQuery }) {
         </button>
       </div>
     );
+  }
+  if (!products || !Array.isArray(products)) {
+    return <div>Loading products...</div>; // or skeleton, or null
   }
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()),
