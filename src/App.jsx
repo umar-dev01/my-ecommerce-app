@@ -12,7 +12,7 @@ import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import { CartProvider } from "./context/CartContext";
 // import UseRef from "./practice/ref";
-import BlogApp from "./practice/blog/blogApp";
+// import BlogApp from "./practice/blog/blogApp";
 function App() {
   return (
     <AuthProvider>
