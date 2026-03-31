@@ -4,6 +4,8 @@ import { AuthProvider } from "./context/AuthContext";
 import AuthLayout from "./components/AuthLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
+import Checkout from "./pages/Checkout";
+import OrderCompleted from "./pages/OrderComplete";
 import ProductDetails from "./pages/productDetails";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
@@ -11,8 +13,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import { CartProvider } from "./context/CartContext";
-// import UseRef from "./practice/ref";
-// import BlogApp from "./practice/blog/blogApp";
+
 function App() {
   return (
     <AuthProvider>
@@ -32,6 +33,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Cart />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/checkout"
+                element={
+                  <ProtectedRoute>
+                    <Checkout />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/order-completed"
+                element={
+                  <ProtectedRoute>
+                    <OrderCompleted />
                   </ProtectedRoute>
                 }
               />

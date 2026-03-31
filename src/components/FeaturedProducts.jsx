@@ -2,11 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
+
 function FeaturedProducts() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { dispatch, ACTIONS } = useContext(CartContext);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const { cart, dispatch, ACTIONS } = useContext(CartContext);
   const navigate = useNavigate();
+
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -23,30 +26,55 @@ function FeaturedProducts() {
     }
     fetchProducts();
   }, []);
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-hpink border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-500 border-t-transparent"></div>
       </div>
     );
   }
+
+  const totalSlides = Math.ceil(products.length / 4);
+
+  // Check if product is already in cart
+  const isProductInCart = (productId) => {
+    return cart.items.some((item) => item.id === productId);
+  };
+
   return (
-    <section className="py-16 px-8">
-      <div className=" container mx-auto">
-        <div className=" text-center mb-12">
-          <h2 className="font-josefin text-4xl font-bold text-hdark mb-3">
-            Featured products
+    <section className="py-16 px-8 bg-white">
+      <div className="container mx-auto">
+        {/* Title Section */}
+        <div className="text-center mb-8">
+          {/* Carousel Dots */}
+          <div className="flex justify-center gap-2 mb-6">
+            {Array.from({ length: totalSlides }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`w-3 h-3 rounded-full transition ${
+                  index === currentSlide ? "bg-gray-400" : "bg-gray-300"
+                }`}
+              ></button>
+            ))}
+          </div>
+
+          <h2 className="font-josefin text-5xl font-bold text-blue-900 mb-4">
+            Featured Products
           </h2>
-          <div className=" w-16 h-1 bg-hpink mx-auto"></div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {products.map((product, index) => (
             <div
               key={product._id}
-              className="bg-hlight relative overflow-hidden"
+              className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition border border-gray-100"
             >
+              {/* Image Section */}
               <div
-                className="h-56 flex item-center justify-center p-4 cursor-pointer"
+                className="h-64 flex items-center justify-center p-6 bg-gray-50 cursor-pointer hover:bg-gray-100 transition"
                 onClick={() => {
                   navigate(`/products/${product._id}`);
                 }}
@@ -54,51 +82,75 @@ function FeaturedProducts() {
                 <img
                   src={product.images?.[0]}
                   alt={product.name}
-                  className="h-full object-contain group-hover:scale-105 transition duration-300"
+                  className="h-full object-contain"
                   onError={(e) => {
-                    e.target.src = "https://placehold.co/300x200?text=No+Image";
+                    e.target.src = "https://placehold.co/300x250?text=No+Image";
                   }}
                 />
               </div>
-              <div className=" p-4 bg-white">
+
+              {/* Product Info Section */}
+              <div className="p-6 bg-white text-center border-t border-gray-100">
+                {/* Product Name in Pink */}
                 <h3
                   onClick={() => {
                     navigate(`/products/${product._id}`);
                   }}
-                  className="font-josefin font-bold text-hdark text-lg mb-1 cursor-pointer hover:text-hpink transition"
+                  className="font-josefin font-bold text-pink-500 text-lg mb-2 cursor-pointer hover:text-pink-600 transition"
                 >
                   {product.name}
                 </h3>
-                <div className="flex item-center gap-3 mb-3">
-                  <span className="text-hpink font-bold">
-                    ${Number(product.price).toFixed(2)}
-                  </span>
-                </div>
 
+                {/* Product Code */}
+                <p className="text-gray-600 text-sm mb-3">
+                  Code - {product.sku || "Y523201"}
+                </p>
+
+                {/* Price in Dark Color */}
+                <p className="text-gray-800 font-bold text-lg">
+                  ${Number(product.price).toFixed(2)}
+                </p>
+
+                {/* Add to Cart Button */}
                 <button
                   onClick={() => {
-                    dispatch({
-                      type: ACTIONS.ADD_ITEM,
-                      payload: {
-                        id: product._id,
-                        name: product.name,
-                        price: product.price,
-                        image: product.images?.[0],
-                      },
-                    });
+                    if (isProductInCart(product._id)) {
+                      dispatch({
+                        type: ACTIONS.REMOVE_ITEM,
+                        payload: { id: product._id },
+                      });
+                    } else {
+                      dispatch({
+                        type: ACTIONS.ADD_ITEM,
+                        payload: {
+                          id: product._id,
+                          name: product.name,
+                          price: product.price,
+                          image: product.images?.[0],
+                        },
+                      });
+                    }
                   }}
-                  className="w-full bg-hdark text-white font-josefin py-2 hover:bg-hpurple transition text-sm"
+                  className={`w-full font-josefin py-2 mt-4 transition text-sm font-semibold ${
+                    isProductInCart(product._id)
+                      ? "bg-red-500 text-white hover:bg-red-600"
+                      : "bg-pink-500 text-white hover:bg-pink-700"
+                  }`}
                 >
-                  Add to Cart
+                  {isProductInCart(product._id)
+                    ? "Remove from Cart"
+                    : "Add to Cart"}
                 </button>
               </div>
             </div>
           ))}
         </div>
-        <div className="text-center mt-10">
+
+        {/* View All Products Button */}
+        <div className="text-center mt-12">
           <button
             onClick={() => navigate("/products")}
-            className="border-2 border-hpink text-hpink font-josefin font-semibold px-10 py-3 hover:bg-hpink hover:text-white transition"
+            className="border-2 border-pink-500 text-pink-500 font-josefin font-semibold px-12 py-3 hover:bg-pink-500 hover:text-white transition"
           >
             View All Products
           </button>

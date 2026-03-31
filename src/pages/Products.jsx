@@ -11,7 +11,7 @@ function Products() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("default");
 
-  const { dispatch, ACTIONS } = useContext(CartContext);
+  const { cart, dispatch, ACTIONS } = useContext(CartContext);
   const navigate = useNavigate();
 
   // ─── Fetch all products ────────────────────────────
@@ -39,6 +39,11 @@ function Products() {
     const cats = products.map((p) => p.category).filter(Boolean);
     return [...new Set(cats)]; // removes duplicates
   }, [products]);
+
+  // ─── Check if product is already in cart ─────────────
+  const isProductInCart = (productId) => {
+    return cart.items.some((item) => item.id === productId);
+  };
 
   // ─── Filter + Sort products ───────────────────────────
   const filteredProducts = useMemo(() => {
@@ -216,20 +221,33 @@ function Products() {
                       </span>
 
                       <button
-                        onClick={() =>
-                          dispatch({
-                            type: ACTIONS.ADD_ITEM,
-                            payload: {
-                              id: product._id,
-                              name: product.name,
-                              price: product.price,
-                              image: product.images?.[0],
-                            },
-                          })
-                        }
-                        className="bg-hdark text-white font-josefin text-xs px-4 py-2 hover:bg-hpurple transition"
+                        onClick={() => {
+                          if (isProductInCart(product._id)) {
+                            dispatch({
+                              type: ACTIONS.REMOVE_ITEM,
+                              payload: { id: product._id },
+                            });
+                          } else {
+                            dispatch({
+                              type: ACTIONS.ADD_ITEM,
+                              payload: {
+                                id: product._id,
+                                name: product.name,
+                                price: product.price,
+                                image: product.images?.[0],
+                              },
+                            });
+                          }
+                        }}
+                        className={`font-josefin text-xs px-4 py-2 transition ${
+                          isProductInCart(product._id)
+                            ? "bg-red-500 text-white hover:bg-red-600"
+                            : "bg-pink-500 text-white hover:bg-pink-700"
+                        }`}
                       >
-                        Add to Cart
+                        {isProductInCart(product._id)
+                          ? "Remove from Cart"
+                          : "Add to Cart"}
                       </button>
                     </div>
                   </div>
