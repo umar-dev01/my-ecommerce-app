@@ -5,7 +5,7 @@ import AuthLayout from "./components/AuthLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import ProductDetails from "./pages/productDetails";
-import Products from "./pages/Product";
+import Products from "./pages/Products";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Register from "./pages/Register";

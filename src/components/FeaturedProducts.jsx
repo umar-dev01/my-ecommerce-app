@@ -14,7 +14,7 @@ function FeaturedProducts() {
           `${import.meta.env.VITE_API_URL}/api/v1/products`,
         );
         const data = await res.json();
-        setProducts(data.slice(0, 8));
+        setProducts(data.products.slice(0, 8));
       } catch (err) {
         console.error(err);
       } finally {
@@ -45,18 +45,66 @@ function FeaturedProducts() {
               key={product._id}
               className="bg-hlight relative overflow-hidden"
             >
-              <img
-                src={product.images?.[0]}
-                alt={product.name}
-                className="h-full object-contain group-hover:scale-105 transition duration-300"
-                onError={(e) => {
-                  e.target.src = "https://placehold.co/300x200?text=No+Image";
+              <div
+                className="h-56 flex item-center justify-center p-4 cursor-pointer"
+                onClick={() => {
+                  navigate(`/products/${product._id}`);
                 }}
-              />
+              >
+                <img
+                  src={product.images?.[0]}
+                  alt={product.name}
+                  className="h-full object-contain group-hover:scale-105 transition duration-300"
+                  onError={(e) => {
+                    e.target.src = "https://placehold.co/300x200?text=No+Image";
+                  }}
+                />
+              </div>
+              <div className=" p-4 bg-white">
+                <h3
+                  onClick={() => {
+                    navigate(`/products/${product._id}`);
+                  }}
+                  className="font-josefin font-bold text-hdark text-lg mb-1 cursor-pointer hover:text-hpink transition"
+                >
+                  {product.name}
+                </h3>
+                <div className="flex item-center gap-3 mb-3">
+                  <span className="text-hpink font-bold">
+                    ${Number(product.price).toFixed(2)}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => {
+                    dispatch({
+                      type: ACTIONS.ADD_ITEM,
+                      payload: {
+                        id: product._id,
+                        name: product.name,
+                        price: product.price,
+                        image: product.images?.[0],
+                      },
+                    });
+                  }}
+                  className="w-full bg-hdark text-white font-josefin py-2 hover:bg-hpurple transition text-sm"
+                >
+                  Add to Cart
+                </button>
+              </div>
             </div>
           ))}
+        </div>
+        <div className="text-center mt-10">
+          <button
+            onClick={() => navigate("/products")}
+            className="border-2 border-hpink text-hpink font-josefin font-semibold px-10 py-3 hover:bg-hpink hover:text-white transition"
+          >
+            View All Products
+          </button>
         </div>
       </div>
     </section>
   );
 }
+export default FeaturedProducts;

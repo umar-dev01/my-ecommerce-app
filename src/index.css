@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.cont {
+  max-width: 120rem;
+  margin: 0 auto;
+  padding: 0 3.4rem;
+}
+.link-hover {
+  padding: 10px;
+}
