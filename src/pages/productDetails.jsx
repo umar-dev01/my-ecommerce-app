@@ -2,12 +2,18 @@ import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 function ProductDetails() {
-  const { dispatch, ACTIONS } = useContext(CartContext);
+  const { cart, dispatch, ACTIONS } = useContext(CartContext);
   const { id } = useParams(); // reads id from URL
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const productId = product?._id || product?.id || id;
+  const productImage = product?.images?.[0] || product?.images?.[1] || "";
+  const isProductInCart = cart.items.some(
+    (item) => String(item.id) === String(productId),
+  );
 
   useEffect(() => {
     async function fetchProduct() {
@@ -88,20 +94,32 @@ function ProductDetails() {
             </p>
             <p className="text-gray-600 mb-6">{product.description}</p>
             <button
-              onClick={() =>
+              onClick={() => {
+                if (isProductInCart) {
+                  dispatch({
+                    type: ACTIONS.REMOVE_ITEM,
+                    payload: { id: productId },
+                  });
+                  return;
+                }
+
                 dispatch({
                   type: ACTIONS.ADD_ITEM,
                   payload: {
-                    id: product.id,
+                    id: productId,
                     name: product.name,
                     price: product.price,
-                    image: product.images[1],
+                    image: productImage,
                   },
-                })
-              }
-              className="w-full bg-pink-600 text-white py-3 rounded-lg hover:bg-pink-700 transition font-bold"
+                });
+              }}
+              className={`w-full text-white py-3 rounded-lg transition font-bold ${
+                isProductInCart
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-pink-600 hover:bg-pink-700"
+              }`}
             >
-              Add to Cart 🛒
+              {isProductInCart ? "Remove from Cart" : "Add to Cart 🛒"}
             </button>
           </div>
         </div>
