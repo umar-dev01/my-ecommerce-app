@@ -15,6 +15,7 @@ import OrderHistory from "./pages/OrderHistory";
 import OrderDetails from "./pages/orderDetails";
 import NotFound from "./pages/NotFound";
 import { CartProvider } from "./context/CartContext";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -77,6 +78,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <OrderDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               }
             />

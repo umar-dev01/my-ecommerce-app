@@ -24,64 +24,66 @@ function Navbar() {
 
   return (
     <nav className="bg-white px-12 py-4 flex items-center justify-between shadow-sm border-b border-gray-200">
-      {/* Logo */}
+      {/* ── Logo ── */}
       <div className="flex items-center">
-        <img src="/images/hekto-logo.png" alt="Hekto Logo" className="h-8" />
+        <Link to="/">
+          <img src="/images/hekto-logo.png" alt="Hekto Logo" className="h-8" />
+        </Link>
       </div>
 
-      {/* Navigation Links */}
+      {/* ── Navigation Links ── */}
       <div className="flex items-center gap-8">
         <Link
           to="/"
-          className="text-gray-800 hover:text-purple-600 font-medium text-sm"
+          className="text-gray-800 hover:text-hpink font-josefin font-medium text-sm transition"
         >
           Home
         </Link>
         <Link
-          to="/"
-          className="text-gray-800 hover:text-purple-600 font-medium text-sm"
-        >
-          Pages
-        </Link>
-        <Link
           to="/products"
-          className="text-gray-800 hover:text-purple-600 font-medium text-sm"
+          className="text-gray-800 hover:text-hpink font-josefin font-medium text-sm transition"
         >
           Products
         </Link>
+
+        {/* My Orders — only show when logged in */}
+        {isAuthenticated && (
+          <Link
+            to="/orders"
+            className="text-gray-800 hover:text-hpink font-josefin font-medium text-sm transition"
+          >
+            My Orders
+          </Link>
+        )}
+
         <Link
-          to="/Orders"
-          className="text-gray-800 hover:text-purple-600 font-medium text-sm"
-        >
-          My Orders
-        </Link>
-        <Link
-          to="/Cart"
-          className="text-gray-800 hover:text-purple-600 font-medium text-sm"
+          to="/cart"
+          className="text-gray-800 hover:text-hpink font-josefin font-medium text-sm transition"
         >
           Cart
         </Link>
         <Link
-          to="/"
-          className="text-gray-800 hover:text-purple-600 font-medium text-sm"
+          to="/contact"
+          className="text-gray-800 hover:text-hpink font-josefin font-medium text-sm transition"
         >
           Contact
         </Link>
       </div>
 
-      {/* Search Bar & User Actions */}
+      {/* ── Search + Actions ── */}
       <div className="flex items-center gap-6">
+        {/* Search Bar */}
         <form onSubmit={handleSearch} className="flex items-center">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search..."
-            className="px-4 py-2 border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 w-48"
+            className="px-4 py-2 border border-gray-300 text-sm focus:outline-none focus:border-hpink w-44 font-lato"
           />
           <button
             type="submit"
-            className="ml-0 bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-sm font-medium text-sm"
+            className="bg-hpink hover:bg-pink-700 text-white px-4 py-2 text-sm transition"
           >
             🔍
           </button>
@@ -90,23 +92,37 @@ function Navbar() {
         {/* Cart Icon */}
         <Link
           to="/cart"
-          className="relative text-gray-800 hover:text-purple-600"
+          className="relative text-gray-800 hover:text-hpink transition"
         >
-          <span className="text-lg">🛒</span>
+          <span className="text-xl">🛒</span>
           {cart.totalItems > 0 && (
-            <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+            <span className="absolute -top-2 -right-2 bg-hpink text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-josefin">
               {cart.totalItems}
             </span>
           )}
         </Link>
 
-        {/* User Menu */}
+        {/* ── User Menu ── */}
         {isAuthenticated ? (
           <div className="flex items-center gap-3">
-            <span className="text-gray-700 text-sm">👤 {user?.name}</span>
+            {/* Profile Link — clicking name goes to profile */}
+            <Link
+              to="/profile"
+              className="flex items-center gap-2 text-hdark hover:text-hpink font-josefin text-sm font-semibold transition"
+            >
+              {/* Avatar Circle */}
+              <div className="w-8 h-8 bg-hdark rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">
+                  {user?.name?.charAt(0).toUpperCase() || "U"}
+                </span>
+              </div>
+              {user?.name}
+            </Link>
+
+            {/* Logout */}
             <button
               onClick={handleLogout}
-              className="text-gray-800 hover:text-purple-600 text-sm font-medium"
+              className="bg-hpink text-white font-josefin text-sm px-4 py-1 hover:bg-pink-700 transition"
             >
               Logout
             </button>
@@ -115,13 +131,13 @@ function Navbar() {
           <div className="flex items-center gap-4">
             <Link
               to="/login"
-              className="text-gray-800 hover:text-purple-600 text-sm font-medium"
+              className="font-josefin text-sm font-medium text-hdark hover:text-hpink transition"
             >
               Login
             </Link>
             <Link
               to="/register"
-              className="text-gray-800 hover:text-purple-600 text-sm font-medium"
+              className="bg-hpink text-white font-josefin text-sm px-4 py-1 hover:bg-pink-700 transition"
             >
               Register
             </Link>
