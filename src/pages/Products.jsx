@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import Sidebar from "../components/sidebar";
+import { getProductsList } from "../utils/productsApi";
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -13,18 +14,15 @@ function Products() {
 
   const { cart, dispatch, ACTIONS } = useContext(CartContext);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // ─── Fetch all products ────────────────────────────
   useEffect(() => {
     async function fetchProducts() {
       try {
         setIsLoading(true);
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/v1/products`,
-        );
-        if (!res.ok) throw new Error("Failed to fetch products");
-        const data = await res.json();
-        setProducts(data.products);
+        const allProducts = await getProductsList();
+        setProducts(allProducts);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -39,6 +37,26 @@ function Products() {
     const cats = products.map((p) => p.category).filter(Boolean);
     return [...new Set(cats)]; // removes duplicates
   }, [products]);
+
+  useEffect(() => {
+    const querySearch = searchParams.get("search");
+    if (querySearch) {
+      setSearch(querySearch);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const queryCategory = searchParams.get("category");
+    if (!queryCategory) return;
+
+    const matchedCategory = categories.find(
+      (category) => category.toLowerCase() === queryCategory.toLowerCase(),
+    );
+
+    if (matchedCategory) {
+      setSelectedCategory(matchedCategory);
+    }
+  }, [searchParams, categories]);
 
   // ─── Check if product is already in cart ─────────────
   const isProductInCart = (productId) => {
@@ -90,7 +108,7 @@ function Products() {
           <p className="text-red-500 text-xl mb-4">❌ {error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-hpink text-white px-6 py-2 rounded hover:bg-pink-700"
+            className="bg-hpink text-white px-6 py-2 rounded hover:brightness-95 transition"
           >
             Try Again
           </button>
@@ -242,7 +260,7 @@ function Products() {
                         className={`font-josefin text-xs px-4 py-2 transition ${
                           isProductInCart(product._id)
                             ? "bg-red-500 text-white hover:bg-red-600"
-                            : "bg-pink-500 text-white hover:bg-pink-700"
+                            : "bg-hpink text-white hover:brightness-95"
                         }`}
                       >
                         {isProductInCart(product._id)

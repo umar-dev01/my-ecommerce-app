@@ -1,6 +1,17 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 function Footer() {
+  const navigate = useNavigate();
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+
+  function handleNewsletterSignup(e) {
+    e.preventDefault();
+    navigate("/login", {
+      state: { prefillEmail: newsletterEmail.trim() },
+    });
+  }
+
   return (
     <footer className="bg-white pt-16 pb-8 px-8 border-t border-gray-200">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
@@ -26,22 +37,34 @@ function Footer() {
           </h3>
           <ul className="space-y-2 text-gray-500 font-lato text-sm">
             <li>
-              <Link to="/products" className="hover:text-hpink transition">
+              <Link
+                to="/products?category=sofas"
+                className="hover:text-hpink transition"
+              >
                 Sofas
               </Link>
             </li>
             <li>
-              <Link to="/products" className="hover:text-hpink transition">
+              <Link
+                to="/products?category=chairs"
+                className="hover:text-hpink transition"
+              >
                 Chairs
               </Link>
             </li>
             <li>
-              <Link to="/products" className="hover:text-hpink transition">
+              <Link
+                to="/products?category=tables"
+                className="hover:text-hpink transition"
+              >
                 Tables
               </Link>
             </li>
             <li>
-              <Link to="/products" className="hover:text-hpink transition">
+              <Link
+                to="/products?category=lamps"
+                className="hover:text-hpink transition"
+              >
                 Lamps
               </Link>
             </li>
@@ -55,22 +78,22 @@ function Footer() {
           </h3>
           <ul className="space-y-2 text-gray-500 font-lato text-sm">
             <li>
-              <Link to="/" className="hover:text-hpink transition">
+              <Link to="/orders" className="hover:text-hpink transition">
                 My Account
               </Link>
             </li>
             <li>
-              <Link to="/" className="hover:text-hpink transition">
+              <Link to="/checkout" className="hover:text-hpink transition">
                 Checkout
               </Link>
             </li>
             <li>
-              <Link to="/" className="hover:text-hpink transition">
+              <Link to="/cart" className="hover:text-hpink transition">
                 Cart
               </Link>
             </li>
             <li>
-              <Link to="/" className="hover:text-hpink transition">
+              <Link to="/products" className="hover:text-hpink transition">
                 Shop
               </Link>
             </li>
@@ -82,16 +105,22 @@ function Footer() {
           <h3 className="font-josefin font-bold text-hdark text-lg mb-4">
             Newsletter
           </h3>
-          <div className="flex">
+          <form className="flex" onSubmit={handleNewsletterSignup}>
             <input
               type="email"
               placeholder="Enter Email Address"
+              value={newsletterEmail}
+              onChange={(e) => setNewsletterEmail(e.target.value)}
+              required
               className="flex-1 border border-gray-300 px-3 py-2 text-sm focus:outline-none font-lato"
             />
-            <button className="bg-hpink text-white px-4 py-2 text-sm font-josefin hover:bg-pink-700 transition">
+            <button
+              type="submit"
+              className="bg-hpink text-white px-4 py-2 text-sm font-josefin hover:brightness-95 transition"
+            >
               Sign Up
             </button>
-          </div>
+          </form>
           <p className="text-gray-400 text-xs font-lato mt-2">
             Contact: umr7905@gmail.com
           </p>

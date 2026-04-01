@@ -1,12 +1,20 @@
-import { useState, useContext } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useContext, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, isLoading, error } = useContext(AuthContext);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(location.state?.prefillEmail || "");
   const [password, setPassword] = useState("");
   const [localError, setLocalError] = useState("");
+
+  useEffect(() => {
+    if (location.state?.prefillEmail) {
+      setEmail(location.state.prefillEmail);
+    }
+  }, [location.state]);
+
   async function handleSubmit(e) {
     e.preventDefault();
     setLocalError("");
@@ -52,7 +60,7 @@ function Login() {
         {/* Title */}
         <button
           onClick={() => navigate("/")}
-          className="text-purple-800 font-bold mb-6 hover:text-pink-600 transition"
+          className="text-hdark font-bold mb-6 hover:text-hpink transition"
         >
           ← Back to Products
         </button>
@@ -106,7 +114,7 @@ function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-pink-600 text-white font-bold py-2 rounded-lg hover:bg-pink-700 transition disabled:bg-gray-400"
+            className="w-full bg-hpink text-white font-bold py-2 rounded-lg hover:brightness-95 transition disabled:bg-gray-400"
           >
             {isLoading ? "Signing in..." : "Sign In"}
           </button>
@@ -120,7 +128,7 @@ function Login() {
           Don't have an account?{" "}
           <Link
             to="/register"
-            className="text-pink-600 font-bold hover:text-pink-700"
+            className="text-hpink font-bold hover:brightness-95"
           >
             Create one
           </Link>

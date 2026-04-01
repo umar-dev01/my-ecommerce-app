@@ -57,7 +57,7 @@ function OrderHistory() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-600 border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-hpink border-t-transparent"></div>
       </div>
     );
   }
@@ -69,7 +69,7 @@ function OrderHistory() {
           <p className="text-red-500 text-xl mb-4">❌ {error}</p>
           <button
             onClick={() => navigate("/products")}
-            className="bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700"
+            className="bg-hpink text-white px-6 py-2 rounded hover:brightness-95 transition"
           >
             Continue Shopping
           </button>
@@ -82,16 +82,24 @@ function OrderHistory() {
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="container mx-auto max-w-5xl">
         {/* Header */}
-        <h1 className="font-josefin text-4xl font-bold text-purple-800 mb-8">
-          My Orders
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <h1 className="font-josefin text-4xl font-bold text-hdark">
+            My Orders
+          </h1>
+          <button
+            onClick={() => navigate("/")}
+            className="bg-white border border-hdark text-hdark px-5 py-2 rounded hover:bg-hlight transition"
+          >
+            Go Back to Home
+          </button>
+        </div>
 
         {orders.length === 0 ? (
           <div className="bg-white rounded-lg p-12 text-center">
             <p className="text-gray-500 text-xl mb-6">No orders yet!</p>
             <button
               onClick={() => navigate("/products")}
-              className="bg-pink-600 text-white px-8 py-3 rounded-lg hover:bg-pink-700 transition"
+              className="bg-hpink text-white px-8 py-3 rounded-lg hover:brightness-95 transition"
             >
               Start Shopping
             </button>
@@ -106,7 +114,7 @@ function OrderHistory() {
                 <div className="flex flex-wrap justify-between items-start mb-4">
                   <div>
                     <p className="text-gray-500 text-sm">Order ID</p>
-                    <p className="font-mono font-bold text-purple-800">
+                    <p className="font-mono font-bold text-hdark">
                       #{order._id.slice(-8)}
                     </p>
                   </div>
@@ -126,13 +134,13 @@ function OrderHistory() {
                 <div className="flex justify-between items-center border-t pt-4">
                   <div>
                     <p className="text-gray-500 text-sm">Total</p>
-                    <p className="font-bold text-xl text-pink-600">
+                    <p className="font-bold text-xl text-hpink">
                       ${order.totalPrice.toFixed(2)}
                     </p>
                   </div>
                   <button
                     onClick={() => navigate(`/orders/${order._id}`)}
-                    className="bg-purple-800 text-white px-6 py-2 rounded hover:bg-purple-900 transition"
+                    className="bg-hpink text-white px-6 py-2 rounded hover:brightness-95 transition"
                   >
                     View Details →
                   </button>

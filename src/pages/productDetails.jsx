@@ -42,7 +42,7 @@ function ProductDetails() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-4 border-pink-600 border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-4 border-hpink border-t-transparent"></div>
       </div>
     );
   }
@@ -55,7 +55,7 @@ function ProductDetails() {
           <p className="text-red-500 text-xl mb-4">❌ {error}</p>
           <button
             onClick={() => navigate("/")}
-            className="bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700"
+            className="bg-hpink text-white px-6 py-2 rounded hover:brightness-95 transition"
           >
             Back to Products
           </button>
@@ -70,7 +70,7 @@ function ProductDetails() {
         {/* Back Button */}
         <button
           onClick={() => navigate("/")}
-          className="text-purple-800 font-bold mb-6 hover:text-pink-600 transition"
+          className="text-hdark font-bold mb-6 hover:text-hpink transition"
         >
           ← Back to Products
         </button>
@@ -86,10 +86,10 @@ function ProductDetails() {
 
           {/* Product Info */}
           <div>
-            <h1 className="text-3xl font-bold text-purple-800 mb-2">
+            <h1 className="text-3xl font-bold text-hdark mb-2">
               {product.name}
             </h1>
-            <p className="text-2xl text-pink-600 font-bold mb-4">
+            <p className="text-2xl text-hpink font-bold mb-4">
               ${product.price}
             </p>
             <p className="text-gray-600 mb-6">{product.description}</p>
@@ -116,7 +116,7 @@ function ProductDetails() {
               className={`w-full text-white py-3 rounded-lg transition font-bold ${
                 isProductInCart
                   ? "bg-red-500 hover:bg-red-600"
-                  : "bg-pink-600 hover:bg-pink-700"
+                  : "bg-hpink hover:brightness-95"
               }`}
             >
               {isProductInCart ? "Remove from Cart" : "Add to Cart 🛒"}

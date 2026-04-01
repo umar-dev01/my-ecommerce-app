@@ -390,7 +390,7 @@ function Checkout() {
                 className={`w-full font-josefin font-semibold py-3 mt-6 transition ${
                   isSubmitting
                     ? "bg-gray-400 text-white cursor-not-allowed"
-                    : "bg-hpink text-white hover:bg-pink-700"
+                    : "bg-hpink text-white hover:brightness-95"
                 }`}
               >
                 {isSubmitting ? "Placing Order..." : "Place Order"}

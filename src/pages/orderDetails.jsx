@@ -61,7 +61,7 @@ function OrderDetails() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-600 border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-hpink border-t-transparent"></div>
       </div>
     );
   }
@@ -74,7 +74,7 @@ function OrderDetails() {
           <p className="text-red-500 text-xl mb-4">❌ {error}</p>
           <button
             onClick={() => navigate("/orders")}
-            className="bg-purple-800 text-white px-6 py-2 rounded hover:bg-purple-900 transition"
+            className="bg-hdark text-white px-6 py-2 rounded hover:bg-hpurple transition"
           >
             Back to Orders
           </button>
@@ -91,7 +91,7 @@ function OrderDetails() {
           <p className="text-gray-500 text-xl mb-4">No order found</p>
           <button
             onClick={() => navigate("/orders")}
-            className="bg-purple-800 text-white px-6 py-2 rounded hover:bg-purple-900 transition"
+            className="bg-hdark text-white px-6 py-2 rounded hover:bg-hpurple transition"
           >
             Back to Orders
           </button>
@@ -106,7 +106,7 @@ function OrderDetails() {
         {/* Back Button */}
         <button
           onClick={() => navigate("/orders")}
-          className="text-purple-800 font-bold mb-6 hover:text-pink-600 transition"
+          className="text-hdark font-bold mb-6 hover:text-hpink transition"
         >
           ← Back to Orders
         </button>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
+import { getProductsList } from "../utils/productsApi";
 
 function FeaturedProducts() {
   const [products, setProducts] = useState([]);
@@ -13,11 +14,8 @@ function FeaturedProducts() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/v1/products`,
-        );
-        const data = await res.json();
-        setProducts(data.products.slice(0, 8));
+        const allProducts = await getProductsList();
+        setProducts(allProducts.slice(0, 8));
       } catch (err) {
         console.error(err);
       } finally {
