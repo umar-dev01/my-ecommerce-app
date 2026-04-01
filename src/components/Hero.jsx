@@ -5,11 +5,7 @@ function Hero() {
     <section className="bg-purple-100 min-h-screen flex items-center px-12 py-12 relative overflow-hidden">
       {/* Decorative Lamp - Top Left */}
       <div className="absolute top-0 left-12 z-20">
-        <img
-          src="/public/images/hero-lamp.png"
-          alt="Lamp"
-          className="h-64 w-auto"
-        />
+        <img src="/images/hero-lamp.png" alt="Lamp" className="h-64 w-auto" />
       </div>
 
       <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10 pt-8">
@@ -50,7 +46,7 @@ function Hero() {
 
           {/* Sofa Image - Larger */}
           <img
-            src="/public/images/hero-sofa.png"
+            src="/images/hero-sofa.png"
             alt="Hero sofa"
             className="w-full max-w-2xl object-contain z-10"
           />

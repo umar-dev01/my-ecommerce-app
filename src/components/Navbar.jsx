@@ -26,11 +26,7 @@ function Navbar() {
     <nav className="bg-white px-12 py-4 flex items-center justify-between shadow-sm border-b border-gray-200">
       {/* Logo */}
       <div className="flex items-center">
-        <img
-          src="/public/images/hekto-logo.png"
-          alt="Hekto Logo"
-          className="h-8"
-        />
+        <img src="/images/hekto-logo.png" alt="Hekto Logo" className="h-8" />
       </div>
 
       {/* Navigation Links */}
@@ -54,10 +50,10 @@ function Navbar() {
           Products
         </Link>
         <Link
-          to="/"
+          to="/Orders"
           className="text-gray-800 hover:text-purple-600 font-medium text-sm"
         >
-          Blog
+          My Orders
         </Link>
         <Link
           to="/Cart"

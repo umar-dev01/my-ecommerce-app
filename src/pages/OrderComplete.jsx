@@ -38,7 +38,7 @@ function OrderCompleted() {
           {/* Left Section - Clock Icon */}
           <div className="hidden lg:flex flex-col items-center justify-start pt-12 pr-12">
             <img
-              src="/public/images/Group.png"
+              src="/images/Group.png"
               alt="Clock"
               className="w-24 h-24 object-contain mb-4"
             />
@@ -52,7 +52,7 @@ function OrderCompleted() {
             {/* Checkmark Icon */}
             <div className="flex justify-center mb-8">
               <img
-                src="/public/images/Group (2).png"
+                src="/images/Group (2).png"
                 alt="Checkmark"
                 className="w-16 h-16 object-contain"
               />
@@ -83,7 +83,7 @@ function OrderCompleted() {
           <div className="hidden lg:flex flex-col items-center justify-start pt-12 pl-12">
             <div className="w-20 h-20 bg-pink-100 rounded-lg flex items-center justify-center">
               <img
-                src="/public/images/Vector 15 (1).png"
+                src="/images/Vector 15 (1).png"
                 alt="Clipboard"
                 className="w-10 h-10 object-contain"
               />

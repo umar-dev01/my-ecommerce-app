@@ -11,6 +11,8 @@ import Products from "./pages/Products";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import OrderHistory from "./pages/OrderHistory";
+import OrderDetails from "./pages/orderDetails";
 import NotFound from "./pages/NotFound";
 import { CartProvider } from "./context/CartContext";
 
@@ -62,6 +64,22 @@ function App() {
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <OrderHistory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders/:id"
+              element={
+                <ProtectedRoute>
+                  <OrderDetails />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </CartProvider>
