@@ -16,81 +16,93 @@ import OrderDetails from "./pages/orderDetails";
 import NotFound from "./pages/NotFound";
 import { CartProvider } from "./context/CartContext";
 import Profile from "./pages/Profile";
+import Wishlist from "./pages/WishList";
+import { WishlistProvider } from "./context/WishListContext";
 
 function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Pages WITH Navbar */}
-            <Route element={<Layout />}>
-              {/* Public Routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/products/:id" element={<ProductDetails />} />
+        <WishlistProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Pages WITH Navbar */}
+              <Route element={<Layout />}>
+                {/* Public Routes */}
+                <Route path="/" element={<Home />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/products/:id" element={<ProductDetails />} />
 
-              {/* Protected Routes */}
+                {/* Protected Routes */}
+                <Route
+                  path="/cart"
+                  element={
+                    <ProtectedRoute>
+                      <Cart />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/checkout"
+                  element={
+                    <ProtectedRoute>
+                      <Checkout />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/order-completed"
+                  element={
+                    <ProtectedRoute>
+                      <OrderCompleted />
+                    </ProtectedRoute>
+                  }
+                />
+              </Route>
+
+              {/* Pages WITHOUT Navbar */}
+              <Route element={<AuthLayout />}>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+              </Route>
+
+              {/* 404 */}
+              <Route path="*" element={<NotFound />} />
               <Route
-                path="/cart"
+                path="/orders"
                 element={
                   <ProtectedRoute>
-                    <Cart />
+                    <OrderHistory />
                   </ProtectedRoute>
                 }
               />
               <Route
-                path="/checkout"
+                path="/orders/:id"
                 element={
                   <ProtectedRoute>
-                    <Checkout />
+                    <OrderDetails />
                   </ProtectedRoute>
                 }
               />
               <Route
-                path="/order-completed"
+                path="/profile"
                 element={
                   <ProtectedRoute>
-                    <OrderCompleted />
+                    <Profile />
                   </ProtectedRoute>
                 }
               />
-            </Route>
-
-            {/* Pages WITHOUT Navbar */}
-            <Route element={<AuthLayout />}>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-            </Route>
-
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
-            <Route
-              path="/orders"
-              element={
-                <ProtectedRoute>
-                  <OrderHistory />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/orders/:id"
-              element={
-                <ProtectedRoute>
-                  <OrderDetails />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </BrowserRouter>
+              <Route
+                path="/wishlist"
+                element={
+                  <ProtectedRoute>
+                    <Wishlist />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </WishlistProvider>
       </CartProvider>
     </AuthProvider>
   );

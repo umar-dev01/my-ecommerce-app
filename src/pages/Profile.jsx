@@ -76,7 +76,7 @@ function Profile() {
       setProfileError(null);
 
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v1/user/updateMe`,
+        `${import.meta.env.VITE_API_URL}/api/v1/user/me`,
         {
           method: "PATCH",
           headers: {

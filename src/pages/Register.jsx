@@ -8,6 +8,7 @@ function Register() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [localError, setLocalError] = useState("");
@@ -17,13 +18,19 @@ function Register() {
     setLocalError("");
 
     // ✅ Validation
-    if (!name || !email || !password || !passwordConfirm) {
+    if (!name || !email || !phone || !password || !passwordConfirm) {
       setLocalError("Please fill in all fields");
       return;
     }
 
     if (!email.includes("@")) {
       setLocalError("Please enter a valid email");
+      return;
+    }
+
+    const normalizedPhone = phone.replace(/[\s()-]/g, "");
+    if (!/^\+?\d{7,15}$/.test(normalizedPhone)) {
+      setLocalError("Please enter a valid phone number");
       return;
     }
 
@@ -38,7 +45,13 @@ function Register() {
     }
 
     // ✅ Call register from AuthContext
-    const result = await register(name, email, password, passwordConfirm);
+    const result = await register(
+      name,
+      email,
+      phone,
+      password,
+      passwordConfirm,
+    );
 
     if (result.success) {
       // ✅ Registration successful, redirect to home
@@ -98,6 +111,21 @@ function Register() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* Phone Input */}
+          <div>
+            <label className="block text-gray-700 font-semibold mb-2">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+92 300 1234567"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               disabled={isLoading}
             />

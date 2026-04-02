@@ -1,13 +1,26 @@
 import { useState, useContext } from "react";
 import { CartContext } from "../context/CartContext";
+import { useWishlist } from "../context/WishListContext";
+import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Cart from "../pages/Cart";
 function ProductCard({ id, name, price, image }) {
   const { dispatch, ACTIONS } = useContext(CartContext);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  // const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isAuthenticated } = useContext(AuthContext);
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const inWishlist = isInWishlist(id);
   const navigate = useNavigate();
   function handleWishlist() {
-    setIsWishlisted(!isWishlisted);
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    if (inWishlist) {
+      removeFromWishlist(id);
+    } else {
+      addToWishlist(id);
+    }
   }
 
   function handleAddToCart() {
@@ -56,9 +69,9 @@ function ProductCard({ id, name, price, image }) {
         <div className="mt-3">
           <button
             onClick={handleWishlist}
-            className="text-l focus:outline-none"
+            className="text-xl focus:outline-none"
           >
-            {isWishlisted ? "❤️" : "🤍"}
+            {inWishlist ? "❤️" : "🤍"}
           </button>
         </div>
       </div>

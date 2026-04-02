@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useContext } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
+import { AuthContext } from "../context/AuthContext";
+import { useWishlist } from "../context/WishListContext";
 import Sidebar from "../components/sidebar";
 import { getProductsList } from "../utils/productsApi";
 
@@ -13,8 +15,25 @@ function Products() {
   const [sortBy, setSortBy] = useState("default");
 
   const { cart, dispatch, ACTIONS } = useContext(CartContext);
+  const { isAuthenticated } = useContext(AuthContext);
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  function handleWishlistClick(e, productId) {
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    if (isInWishlist(productId)) {
+      removeFromWishlist(productId);
+    } else {
+      addToWishlist(productId);
+    }
+  }
 
   // ─── Fetch all products ────────────────────────────
   useEffect(() => {
@@ -206,7 +225,7 @@ function Products() {
                 >
                   {/* Image */}
                   <div
-                    className="h-56 bg-hlight flex items-center justify-center p-4 cursor-pointer overflow-hidden"
+                    className="h-56 bg-hlight flex items-center justify-center p-4 cursor-pointer overflow-hidden relative"
                     onClick={() => navigate(`/products/${product._id}`)}
                   >
                     <img
@@ -218,6 +237,23 @@ function Products() {
                           "https://placehold.co/300x200?text=No+Image";
                       }}
                     />
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleWishlistClick(e, product._id)}
+                      className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border bg-white/95 text-base shadow-sm transition duration-200 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto ${
+                        isInWishlist(product._id)
+                          ? "border-hpink text-hpink"
+                          : "border-gray-200 text-hdark/70 hover:border-hpink hover:text-hpink"
+                      }`}
+                      aria-label={
+                        isInWishlist(product._id)
+                          ? "Remove from wishlist"
+                          : "Add to wishlist"
+                      }
+                    >
+                      {isInWishlist(product._id) ? "♥" : "♡"}
+                    </button>
                   </div>
 
                   {/* Info */}

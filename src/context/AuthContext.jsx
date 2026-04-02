@@ -36,9 +36,7 @@ export function AuthProvider({ children }) {
       const data = await res.json();
       setUser(data.data.user);
       setError(null);
-      
     } catch (err) {
-      
       setUser(null);
       setToken(null);
       localStorage.removeItem("token");
@@ -54,13 +52,11 @@ export function AuthProvider({ children }) {
       setIsLoading(true);
       setError(null);
 
-      
-
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/v1/user/login`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" }, 
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         },
       );
@@ -78,8 +74,7 @@ export function AuthProvider({ children }) {
 
       await fetchUserData(newToken);
 
-      
-      return { success: true }; 
+      return { success: true };
     } catch (err) {
       setError(err.message);
       return { success: false, error: err.message };
@@ -89,7 +84,7 @@ export function AuthProvider({ children }) {
   }
 
   // Register function
-  async function register(name, email, password, passwordConfirm) {
+  async function register(name, email, phone, password, passwordConfirm) {
     try {
       setIsLoading(true);
       setError(null);
@@ -102,6 +97,7 @@ export function AuthProvider({ children }) {
           body: JSON.stringify({
             name,
             email,
+            phone,
             password,
             passwordConfirm,
             role: "user",
@@ -122,10 +118,10 @@ export function AuthProvider({ children }) {
 
       await fetchUserData(newToken);
 
-      return { success: true }; 
+      return { success: true };
     } catch (err) {
       setError(err.message);
-      return { success: false, error: err.message }; 
+      return { success: false, error: err.message };
     } finally {
       setIsLoading(false);
     }

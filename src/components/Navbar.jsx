@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
-
+// import { WichlistPage } from "../pages/WishList";
 function Navbar() {
   const { cart } = useContext(CartContext);
   const { user, logout, isAuthenticated } = useContext(AuthContext);
@@ -63,10 +63,10 @@ function Navbar() {
           Cart
         </Link>
         <Link
-          to="/contact"
+          to="/WishList"
           className="text-gray-800 hover:text-hpink font-josefin font-medium text-sm transition"
         >
-          Contact
+          Wish List
         </Link>
       </div>
 
