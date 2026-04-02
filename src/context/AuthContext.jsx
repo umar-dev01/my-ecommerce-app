@@ -143,6 +143,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
+    fetchUserData,
     isAuthenticated: !!user,
   };
 

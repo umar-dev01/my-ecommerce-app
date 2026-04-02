@@ -1,21 +1,54 @@
-import { useState, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import ImageUpload from "../components/ImageUpload";
+
+function withCacheBuster(url, version) {
+  if (!url || /^blob:/i.test(url) || /^data:/i.test(url)) {
+    return url;
+  }
+
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}v=${version}`;
+}
+
+function getImageUrl(path, version = Date.now()) {
+  if (!path) return null;
+  const apiBase = import.meta.env.VITE_API_URL || "";
+
+  if (path.startsWith("/images/")) {
+    return withCacheBuster(`${apiBase}${path}`, version);
+  }
+
+  if (apiBase && path.startsWith(`${apiBase}/images/`)) {
+    return withCacheBuster(path, version);
+  }
+
+  if (/^https?:\/\//i.test(path)) return withCacheBuster(path, version);
+  return withCacheBuster(`${import.meta.env.VITE_API_URL}${path}`, version);
+}
 
 function Profile() {
-  const { user, token } = useContext(AuthContext);
+  // ✅ FIX 2: Pull fetchUserData from context
+  const { user, token, fetchUserData } = useContext(AuthContext);
 
   // ─── Profile Form State ───────────────────────────────
   const [profileData, setProfileData] = useState({
     name: user?.name || "",
     email: user?.email || "",
     phone: user?.phone || "",
+    image: user?.image || "",
   });
 
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState(null);
   const [profileSuccess, setProfileSuccess] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imageVersion, setImageVersion] = useState(Date.now());
+  const [imagePreview, setImagePreview] = useState(
+    getImageUrl(user?.image, imageVersion),
+  );
 
-  // ─── Password Form State (for logged-in users) ─────────
+  // ─── Password Form State ──────────────────────────────
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -26,8 +59,8 @@ function Profile() {
   const [passwordError, setPasswordError] = useState(null);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
 
-  // ─── Forgot Password State (2-step verification) ───────
-  const [step, setStep] = useState(1); // 1: email, 2: code, 3: reset password
+  // ─── Forgot Password State ────────────────────────────
+  const [step, setStep] = useState(1);
   const [forgotEmail, setForgotEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [resetData, setResetData] = useState({
@@ -40,6 +73,28 @@ function Profile() {
   const [forgotSuccess, setForgotSuccess] = useState(false);
   const [showForgotForm, setShowForgotForm] = useState(false);
 
+  // Keep form values in sync when user is loaded or refreshed from context.
+  useEffect(() => {
+    if (!user) return;
+
+    setProfileData({
+      name: user.name || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      image: user.image || "",
+    });
+  }, [user]);
+
+  // Keep preview synced with server image unless a local file preview is active.
+  useEffect(() => {
+    if (selectedImage) return;
+    if (user?.image) {
+      setImagePreview(getImageUrl(user.image, imageVersion));
+    } else {
+      setImagePreview(null);
+    }
+  }, [user, selectedImage, imageVersion]);
+
   // ─── Handle Profile Input Change ──────────────────────
   function handleProfileChange(e) {
     const { name, value } = e.target;
@@ -47,6 +102,24 @@ function Profile() {
     setProfileSuccess(false);
     setProfileError(null);
   }
+
+  // ─── Handle Image Selection ───────────────────────────
+  const handleImageSelect = (file) => {
+    if (imagePreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImagePreview(URL.createObjectURL(file));
+    setSelectedImage(file);
+  };
+
+  // Cleanup blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (imagePreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   // ─── Handle Password Input Change ─────────────────────
   function handlePasswordChange(e) {
@@ -62,7 +135,7 @@ function Profile() {
     setResetData((prev) => ({ ...prev, [name]: value }));
   }
 
-  // ─── Submit Profile Update ────────────────────────────
+  // ─── Submit Profile Update WITH Image Upload ──────────
   async function handleProfileSubmit(e) {
     e.preventDefault();
 
@@ -75,29 +148,65 @@ function Profile() {
       setProfileLoading(true);
       setProfileError(null);
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v1/user/me`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: profileData.name,
-            email: profileData.email,
-            phone: profileData.phone,
-          }),
-        },
-      );
+      async function sendProfileUpdate(imageFieldName) {
+        const formData = new FormData();
+        formData.append("name", profileData.name);
+        formData.append("email", profileData.email);
+        formData.append("phone", profileData.phone || "");
 
-      const data = await res.json();
+        if (selectedImage) {
+          formData.append(imageFieldName, selectedImage);
+        }
+
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/v1/user/me`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          },
+        );
+
+        let data = null;
+        const raw = await res.text();
+        if (raw) {
+          try {
+            data = JSON.parse(raw);
+          } catch {
+            data = { message: raw };
+          }
+        }
+
+        return { res, data };
+      }
+
+      let { res, data } = await sendProfileUpdate("photo");
+
+      if (!res.ok && selectedImage) {
+        const firstMessage = data?.message?.toLowerCase() || "";
+        const shouldRetryWithImage =
+          firstMessage.includes("unexpected field") ||
+          firstMessage.includes("photo") ||
+          firstMessage.includes("multipart") ||
+          res.status >= 500;
+
+        if (shouldRetryWithImage) {
+          const retry = await sendProfileUpdate("image");
+          res = retry.res;
+          data = retry.data;
+        }
+      }
 
       if (!res.ok) {
-        throw new Error(data.message || "Failed to update profile");
+        throw new Error(data?.message || "Failed to update profile");
       }
 
       setProfileSuccess(true);
+      setSelectedImage(null);
+      await fetchUserData(token);
+      setImageVersion(Date.now());
     } catch (err) {
       setProfileError(err.message);
     } finally {
@@ -105,7 +214,7 @@ function Profile() {
     }
   }
 
-  // ─── Submit Password Update (for logged-in users) ─────
+  // ─── Submit Password Update ───────────────────────────
   async function handlePasswordSubmit(e) {
     e.preventDefault();
 
@@ -156,6 +265,7 @@ function Profile() {
         confirmNewPassword: "",
       });
       setPasswordSuccess(true);
+      setTimeout(() => setPasswordSuccess(false), 3000);
     } catch (err) {
       setPasswordError(err.message);
     } finally {
@@ -163,7 +273,7 @@ function Profile() {
     }
   }
 
-  // ─── Step 1: Send Verification Code via Email ─────────
+  // ─── Step 1: Send Verification Code ───────────────────
   async function handleSendCode(e) {
     e.preventDefault();
 
@@ -180,9 +290,7 @@ function Profile() {
         `${import.meta.env.VITE_API_URL}/api/v1/user/forgot-password`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: forgotEmail }),
         },
       );
@@ -193,7 +301,6 @@ function Profile() {
         throw new Error(data.message || "Failed to send verification code");
       }
 
-      // Move to step 2 (verify code)
       setStep(2);
       setForgotSuccess(true);
     } catch (err) {
@@ -220,13 +327,8 @@ function Profile() {
         `${import.meta.env.VITE_API_URL}/api/v1/user/verify-reset-code`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: forgotEmail,
-            code: verificationCode,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: forgotEmail, code: verificationCode }),
         },
       );
 
@@ -236,7 +338,6 @@ function Profile() {
         throw new Error(data.message || "Invalid verification code");
       }
 
-      // Move to step 3 (reset password)
       setStep(3);
       setForgotSuccess(false);
       setForgotError(null);
@@ -247,7 +348,7 @@ function Profile() {
     }
   }
 
-  // ─── Step 3: Reset Password with Verified Code ────────
+  // ─── Step 3: Reset Password ───────────────────────────
   async function handleResetPassword(e) {
     e.preventDefault();
 
@@ -269,9 +370,7 @@ function Profile() {
         `${import.meta.env.VITE_API_URL}/api/v1/user/reset-password`,
         {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email: forgotEmail,
             code: verificationCode,
@@ -287,7 +386,6 @@ function Profile() {
         throw new Error(data.message || "Failed to reset password");
       }
 
-      // Reset everything and close form
       setForgotSuccess(true);
       setTimeout(() => {
         setShowForgotForm(false);
@@ -317,7 +415,7 @@ function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* ── Page Header ── */}
+      {/* Page Header */}
       <div className="bg-hlight py-10 px-8">
         <div className="container mx-auto">
           <h1 className="font-josefin text-4xl font-bold text-hdark mb-2">
@@ -327,28 +425,30 @@ function Profile() {
         </div>
       </div>
 
-      {/* ── Main Content ── */}
+      {/* Main Content */}
       <div className="container mx-auto px-8 py-10">
         <div className="max-w-3xl mx-auto space-y-8">
-          {/* ── Profile Header Card ── */}
+          {/* Profile Header Card */}
           <div className="bg-white p-6 shadow-sm flex items-center gap-6">
-            <div className="w-20 h-20 bg-hpurple rounded-full flex items-center justify-center shrink-0">
-              <span className="text-white font-josefin font-bold text-3xl">
-                {user?.name?.charAt(0).toUpperCase() || "U"}
-              </span>
-            </div>
+            <ImageUpload
+              onImageUpload={handleImageSelect}
+              currentImage={imagePreview}
+            />
+
             <div>
               <h2 className="font-josefin font-bold text-hdark text-2xl">
-                {user?.name}
+                {profileData.name}
               </h2>
-              <p className="font-lato text-gray-500 text-sm">{user?.email}</p>
+              <p className="font-lato text-gray-500 text-sm">
+                {profileData.email}
+              </p>
               <span className="inline-block mt-2 bg-hlight text-hpink font-josefin text-xs font-bold px-3 py-1">
                 {user?.role || "Customer"}
               </span>
             </div>
           </div>
 
-          {/* ── Form 1 — Profile Info ── */}
+          {/* Form 1 — Profile Info with Image Upload */}
           <div className="bg-white p-6 shadow-sm">
             <h2 className="font-josefin text-xl font-bold text-hdark mb-6">
               Personal Information
@@ -423,7 +523,7 @@ function Profile() {
             </form>
           </div>
 
-          {/* ── Form 2 — Change Password (Logged In Users) ── */}
+          {/* Form 2 — Change Password */}
           <div className="bg-white p-6 shadow-sm">
             <h2 className="font-josefin text-xl font-bold text-hdark mb-6">
               Change Password
@@ -500,7 +600,7 @@ function Profile() {
             </form>
           </div>
 
-          {/* ── Form 3 — Forgot Password (2-Step Verification) ── */}
+          {/* Form 3 — Forgot Password */}
           <div className="bg-white p-6 shadow-sm">
             <h2 className="font-josefin text-xl font-bold text-hdark mb-6">
               Forgot Password?
@@ -515,29 +615,24 @@ function Profile() {
               </button>
             ) : (
               <>
-                {/* Success Message */}
                 {forgotSuccess && step === 2 && (
                   <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 font-lato text-sm mb-6">
-                    ✅ Verification code sent to {forgotEmail}! Check your
-                    inbox.
+                    ✅ Verification code sent to {forgotEmail}!
                   </div>
                 )}
 
                 {forgotSuccess && step === 3 && (
                   <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 font-lato text-sm mb-6">
-                    ✅ Password reset successfully! You can now login with your
-                    new password.
+                    ✅ Password reset successfully!
                   </div>
                 )}
 
-                {/* Error Message */}
                 {forgotError && (
                   <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 font-lato text-sm mb-6">
                     ❌ {forgotError}
                   </div>
                 )}
 
-                {/* Step 1: Enter Email */}
                 {step === 1 && (
                   <form onSubmit={handleSendCode}>
                     <div className="mb-6">
@@ -551,9 +646,6 @@ function Profile() {
                         placeholder="Enter your registered email"
                         className="w-full border border-gray-300 px-4 py-2 font-lato text-sm focus:outline-none focus:border-hpink"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
-                        We'll send a 5-digit verification code to your email
-                      </p>
                     </div>
 
                     <div className="flex gap-3">
@@ -568,7 +660,6 @@ function Profile() {
                       >
                         {forgotLoading ? "Sending..." : "Send Code"}
                       </button>
-
                       <button
                         type="button"
                         onClick={resetForgotForm}
@@ -580,7 +671,6 @@ function Profile() {
                   </form>
                 )}
 
-                {/* Step 2: Enter Verification Code */}
                 {step === 2 && (
                   <form onSubmit={handleVerifyCode}>
                     <div className="mb-6">
@@ -590,16 +680,11 @@ function Profile() {
                       <input
                         type="text"
                         value={verificationCode}
-                        onChange={(e) =>
-                          setVerificationCode(e.target.value.trim())
-                        }
+                        onChange={(e) => setVerificationCode(e.target.value)}
                         placeholder="Enter 6-digit code"
                         maxLength="6"
                         className="w-full border border-gray-300 px-4 py-2 font-lato text-sm focus:outline-none focus:border-hpink"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Enter the 6-digit code sent to {forgotEmail}
-                      </p>
                     </div>
 
                     <div className="flex gap-3">
@@ -614,13 +699,9 @@ function Profile() {
                       >
                         {forgotLoading ? "Verifying..." : "Verify Code"}
                       </button>
-
                       <button
                         type="button"
-                        onClick={() => {
-                          setStep(1);
-                          setForgotError(null);
-                        }}
+                        onClick={() => setStep(1)}
                         className="font-josefin font-semibold px-8 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
                       >
                         Back
@@ -629,7 +710,6 @@ function Profile() {
                   </form>
                 )}
 
-                {/* Step 3: Reset Password */}
                 {step === 3 && (
                   <form onSubmit={handleResetPassword}>
                     <div className="space-y-4 mb-6">
@@ -674,7 +754,6 @@ function Profile() {
                       >
                         {forgotLoading ? "Resetting..." : "Reset Password"}
                       </button>
-
                       <button
                         type="button"
                         onClick={resetForgotForm}

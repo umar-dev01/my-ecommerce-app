@@ -2,7 +2,23 @@ import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
-// import { WichlistPage } from "../pages/WishList";
+
+function getImageUrl(path) {
+  if (!path) return null;
+  const apiBase = import.meta.env.VITE_API_URL || "";
+
+  if (path.startsWith("/images/")) {
+    return `${apiBase}${path}`;
+  }
+
+  if (apiBase && path.startsWith(`${apiBase}/images/`)) {
+    return path;
+  }
+
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${apiBase}${path}`;
+}
+
 function Navbar() {
   const { cart } = useContext(CartContext);
   const { user, logout, isAuthenticated } = useContext(AuthContext);
@@ -111,10 +127,18 @@ function Navbar() {
               className="flex items-center gap-2 text-hdark hover:text-hpink font-josefin text-sm font-semibold transition"
             >
               {/* Avatar Circle */}
-              <div className="w-8 h-8 bg-hdark rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-bold">
-                  {user?.name?.charAt(0).toUpperCase() || "U"}
-                </span>
+              <div className="w-8 h-8 bg-hdark rounded-full flex items-center justify-center overflow-hidden">
+                {user?.image ? (
+                  <img
+                    src={getImageUrl(user.image)}
+                    alt={`${user?.name || "User"} profile`}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-white text-xs font-bold">
+                    {user?.name?.charAt(0).toUpperCase() || "U"}
+                  </span>
+                )}
               </div>
               {user?.name}
             </Link>
