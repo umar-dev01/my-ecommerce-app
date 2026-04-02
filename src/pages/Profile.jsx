@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import ImageUpload from "../components/ImageUpload";
 
@@ -29,7 +30,8 @@ function getImageUrl(path, version = Date.now()) {
 
 function Profile() {
   // ✅ FIX 2: Pull fetchUserData from context
-  const { user, token, fetchUserData } = useContext(AuthContext);
+  const { user, token, fetchUserData, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   // ─── Profile Form State ───────────────────────────────
   const [profileData, setProfileData] = useState({
@@ -413,6 +415,11 @@ function Profile() {
     setForgotSuccess(false);
   }
 
+  function handleLogoutClick() {
+    logout();
+    navigate("/login");
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Page Header */}
@@ -445,6 +452,26 @@ function Profile() {
               <span className="inline-block mt-2 bg-hlight text-hpink font-josefin text-xs font-bold px-3 py-1">
                 {user?.role || "Customer"}
               </span>
+
+              <div className="mt-4 flex items-center gap-3">
+                {user ? (
+                  <button
+                    type="button"
+                    onClick={handleLogoutClick}
+                    className="font-josefin text-sm font-semibold px-5 py-2 bg-hpink text-white hover:bg-pink-700 transition"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => navigate("/login")}
+                    className="font-josefin text-sm font-semibold px-5 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                  >
+                    Login
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 

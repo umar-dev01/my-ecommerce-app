@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Container from "./Container";
 
 function Footer() {
   const navigate = useNavigate();
@@ -13,8 +14,8 @@ function Footer() {
   }
 
   return (
-    <footer className="bg-white pt-16 pb-8 px-8 border-t border-gray-200">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
+    <footer className="bg-white pt-16 pb-8 border-t border-gray-200">
+      <Container className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
         {/* Column 1 - Logo + Description */}
         <div>
           <img src="/images/hekto-logo.png" alt="Hekto" className="h-8 mb-4" />
@@ -125,14 +126,16 @@ function Footer() {
             Contact: umr7905@gmail.com
           </p>
         </div>
-      </div>
+      </Container>
 
       {/* Bottom Bar */}
-      <div className="border-t border-gray-200 pt-6 text-center">
-        <p className="text-gray-400 font-lato text-sm">
-          ©2025 Hekto — All Rights Reserved
-        </p>
-      </div>
+      <Container>
+        <div className="border-t border-gray-200 pt-6 text-center">
+          <p className="text-gray-400 font-lato text-sm">
+            ©2025 Hekto — All Rights Reserved
+          </p>
+        </div>
+      </Container>
     </footer>
   );
 }

@@ -123,10 +123,6 @@ function ImageUpload({ onImageUpload, currentImage, label }) {
             </span>
           </div>
         </div>
-
-        <span className="font-lato text-sm text-gray-500">
-          Click the picture to update it (minimum 400x400)
-        </span>
       </label>
     </div>
   );
