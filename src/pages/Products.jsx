@@ -4,7 +4,64 @@ import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { useWishlist } from "../context/WishListContext";
 import Sidebar from "../components/sidebar";
+import ProductReviewModal from "../components/ProductReviewModal";
 import { getProductsList } from "../utils/productsApi";
+
+function IconHeart() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1L5 14.5 12 21l7-6.5 1.8-1.8a5 5 0 0 0 0-7.1Z" />
+    </svg>
+  );
+}
+
+function IconCart() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="9" cy="20" r="1.5" />
+      <circle cx="18" cy="20" r="1.5" />
+      <path d="M3 4h2l2.3 10.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.4L22 8H7" />
+      <path d="M14 4v4M12 6h4" />
+    </svg>
+  );
+}
+
+function IconReview() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M21 15a4 4 0 0 1-4 4H9l-5 3V7a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4z" />
+      <path d="M8 10h8" />
+      <path d="M8 13h5" />
+    </svg>
+  );
+}
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -13,6 +70,7 @@ function Products() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("default");
+  const [activeReviewProduct, setActiveReviewProduct] = useState(null);
 
   const { cart, dispatch, ACTIONS } = useContext(CartContext);
   const { isAuthenticated } = useContext(AuthContext);
@@ -33,6 +91,28 @@ function Products() {
     } else {
       addToWishlist(productId);
     }
+  }
+
+  function handleQuickCartClick(e, product) {
+    e.stopPropagation();
+
+    if (isProductInCart(product._id)) {
+      dispatch({
+        type: ACTIONS.REMOVE_ITEM,
+        payload: { id: product._id },
+      });
+      return;
+    }
+
+    dispatch({
+      type: ACTIONS.ADD_ITEM,
+      payload: {
+        id: product._id,
+        name: product.name,
+        price: product.price,
+        image: product.images?.[0],
+      },
+    });
   }
 
   // ─── Fetch all products ────────────────────────────
@@ -238,22 +318,56 @@ function Products() {
                       }}
                     />
 
-                    <button
-                      type="button"
-                      onClick={(e) => handleWishlistClick(e, product._id)}
-                      className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border bg-white/95 text-base shadow-sm transition duration-200 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto ${
-                        isInWishlist(product._id)
-                          ? "border-hpink text-hpink"
-                          : "border-gray-200 text-hdark/70 hover:border-hpink hover:text-hpink"
-                      }`}
-                      aria-label={
-                        isInWishlist(product._id)
-                          ? "Remove from wishlist"
-                          : "Add to wishlist"
-                      }
-                    >
-                      {isInWishlist(product._id) ? "♥" : "♡"}
-                    </button>
+                    <div className="absolute left-3 top-3 flex items-center gap-3 text-[#2f2f2f] opacity-0 pointer-events-none transition duration-200 group-hover:opacity-100 group-hover:pointer-events-auto">
+                      <button
+                        type="button"
+                        onClick={(e) => handleWishlistClick(e, product._id)}
+                        className={`transition ${
+                          isInWishlist(product._id)
+                            ? "text-hpink"
+                            : "text-[#2f2f2f] hover:text-hpink"
+                        }`}
+                        aria-label={
+                          isInWishlist(product._id)
+                            ? "Remove from wishlist"
+                            : "Add to wishlist"
+                        }
+                        title="Wishlist"
+                      >
+                        <IconHeart />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => handleQuickCartClick(e, product)}
+                        className={`transition ${
+                          isProductInCart(product._id)
+                            ? "text-hpink"
+                            : "text-[#2f2f2f] hover:text-hpink"
+                        }`}
+                        aria-label={
+                          isProductInCart(product._id)
+                            ? "Remove from cart"
+                            : "Add to cart"
+                        }
+                        title="Cart"
+                      >
+                        <IconCart />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveReviewProduct(product);
+                        }}
+                        className="text-[#2f2f2f] transition hover:text-hpink"
+                        aria-label="Open reviews"
+                        title="Reviews"
+                      >
+                        <IconReview />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Info */}
@@ -308,6 +422,12 @@ function Products() {
                 </div>
               ))}
             </div>
+
+            <ProductReviewModal
+              product={activeReviewProduct}
+              isOpen={Boolean(activeReviewProduct)}
+              onClose={() => setActiveReviewProduct(null)}
+            />
           </div>
         </div>
       </div>
