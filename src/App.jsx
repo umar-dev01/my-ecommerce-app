@@ -18,6 +18,7 @@ import { CartProvider } from "./context/CartContext";
 import Profile from "./pages/Profile";
 import Wishlist from "./pages/WishList";
 import { WishlistProvider } from "./context/WishListContext";
+import AddProduct from "./pages/AddProduct";
 
 function App() {
   return (
@@ -97,6 +98,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Wishlist />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/add-product"
+                element={
+                  <ProtectedRoute>
+                    <AddProduct />
                   </ProtectedRoute>
                 }
               />

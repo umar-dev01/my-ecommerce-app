@@ -4,17 +4,29 @@ let productsCache = null;
 let cacheTimestamp = 0;
 let inFlightProductsPromise = null;
 
+function getApiBaseUrl() {
+  const envBase = (import.meta.env.VITE_API_URL || "").trim();
+  if (envBase) {
+    return envBase.replace(/\/$/, "");
+  }
+
+  return import.meta.env.PROD ? "" : "";
+}
+
+function buildApiUrl(path) {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const base = getApiBaseUrl();
+  return `${base}${normalizedPath}`;
+}
+
 const REVIEW_LIST_ENDPOINTS = [
-  (productId) =>
-    `${import.meta.env.VITE_API_URL}/api/v1/products/${productId}/reviews`,
-  (productId) =>
-    `${import.meta.env.VITE_API_URL}/api/v1/reviews?product=${productId}`,
+  (productId) => buildApiUrl(`/api/v1/products/${productId}/reviews`),
+  (productId) => buildApiUrl(`/api/v1/reviews?product=${productId}`),
 ];
 
 const REVIEW_CREATE_ENDPOINTS = [
-  (productId) =>
-    `${import.meta.env.VITE_API_URL}/api/v1/products/${productId}/reviews`,
-  () => `${import.meta.env.VITE_API_URL}/api/v1/reviews`,
+  (productId) => buildApiUrl(`/api/v1/products/${productId}/reviews`),
+  () => buildApiUrl("/api/v1/reviews"),
 ];
 
 function sleep(ms) {
@@ -86,9 +98,7 @@ export async function getProductsList({ forceRefresh = false } = {}) {
   }
 
   inFlightProductsPromise = (async () => {
-    const res = await fetchWith429Retry(
-      `${import.meta.env.VITE_API_URL}/api/v1/products`,
-    );
+    const res = await fetchWith429Retry(buildApiUrl("/api/v1/products"));
 
     if (!res.ok) {
       throw new Error(`Failed to fetch products (status ${res.status})`);
@@ -107,6 +117,42 @@ export async function getProductsList({ forceRefresh = false } = {}) {
   } finally {
     inFlightProductsPromise = null;
   }
+}
+
+export async function createProduct({ formData, token }) {
+  if (!token) {
+    throw new Error("Login required to add a product");
+  }
+
+  if (!(formData instanceof FormData)) {
+    throw new Error("Invalid product payload");
+  }
+
+  const response = await fetch(buildApiUrl("/api/v1/products"), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  const payload = await parseJsonSafe(response);
+
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("You are not allowed to add products");
+    }
+
+    throw new Error(
+      payload?.message ||
+        `Failed to create product (status ${response.status})`,
+    );
+  }
+
+  productsCache = null;
+  cacheTimestamp = 0;
+
+  return payload;
 }
 
 export async function getProductReviews(productId) {

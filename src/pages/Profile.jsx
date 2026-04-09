@@ -278,12 +278,16 @@ function Profile() {
   // ─── Step 1: Send Verification Code ───────────────────
   async function handleSendCode(e) {
     e.preventDefault();
-
+    console.log(
+      "Sending to:",
+      `${import.meta.env.VITE_API_URL}/api/v1/user/forgot-password`,
+    );
     if (!forgotEmail.trim()) {
       setForgotError("Please enter your email address");
       return;
     }
-
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
     try {
       setForgotLoading(true);
       setForgotError(null);
@@ -294,10 +298,19 @@ function Profile() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: forgotEmail }),
+          signal: controller.signal,
         },
       );
-
-      const data = await res.json();
+      clearTimeout(timeoutId);
+      let data = null;
+      const raw = await res.text();
+      if (raw) {
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          data = { message: raw };
+        }
+      }
 
       if (!res.ok) {
         throw new Error(data.message || "Failed to send verification code");

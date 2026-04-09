@@ -26,6 +26,9 @@ function Navbar() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const userRole = (user?.role || "").toLowerCase();
+  const canManageProducts =
+    userRole === "admin" || userRole === "seller" || userRole === "manager";
 
   function handleSearch(e) {
     e.preventDefault();
@@ -88,6 +91,14 @@ function Navbar() {
                   className="text-gray-800 hover:text-hpink font-josefin font-medium text-[14px] transition whitespace-nowrap"
                 >
                   My Orders
+                </Link>
+              )}
+              {isAuthenticated && canManageProducts && (
+                <Link
+                  to="/add-product"
+                  className="text-gray-800 hover:text-hpink font-josefin font-medium text-[14px] transition whitespace-nowrap"
+                >
+                  Add Product
                 </Link>
               )}
               <Link
@@ -221,6 +232,15 @@ function Navbar() {
                   className="rounded-lg px-3 py-2 text-gray-800 transition hover:bg-hlight hover:text-hpink font-josefin font-medium text-sm"
                 >
                   My Orders
+                </Link>
+              )}
+              {isAuthenticated && canManageProducts && (
+                <Link
+                  to="/add-product"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="rounded-lg px-3 py-2 text-gray-800 transition hover:bg-hlight hover:text-hpink font-josefin font-medium text-sm"
+                >
+                  Add Product
                 </Link>
               )}
               <Link
