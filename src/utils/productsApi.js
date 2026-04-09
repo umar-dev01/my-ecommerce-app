@@ -1,4 +1,5 @@
 const PRODUCTS_CACHE_TTL_MS = 60 * 1000;
+const PRODUCT_CREATE_TIMEOUT_MS = 30000;
 
 let productsCache = null;
 let cacheTimestamp = 0;
@@ -128,31 +129,48 @@ export async function createProduct({ formData, token }) {
     throw new Error("Invalid product payload");
   }
 
-  const response = await fetch(buildApiUrl("/api/v1/products"), {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    PRODUCT_CREATE_TIMEOUT_MS,
+  );
 
-  const payload = await parseJsonSafe(response);
+  try {
+    const response = await fetch(buildApiUrl("/api/v1/products/"), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+      signal: controller.signal,
+    });
 
-  if (!response.ok) {
-    if (response.status === 401 || response.status === 403) {
-      throw new Error("You are not allowed to add products");
+    const payload = await parseJsonSafe(response);
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new Error("You are not allowed to add products");
+      }
+
+      throw new Error(
+        payload?.message ||
+          `Failed to create product (status ${response.status})`,
+      );
     }
 
-    throw new Error(
-      payload?.message ||
-        `Failed to create product (status ${response.status})`,
-    );
+    productsCache = null;
+    cacheTimestamp = 0;
+
+    return payload;
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error("Product creation timed out. Please try again.");
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  productsCache = null;
-  cacheTimestamp = 0;
-
-  return payload;
 }
 
 export async function getProductReviews(productId) {
