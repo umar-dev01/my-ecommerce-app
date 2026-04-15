@@ -1,33 +1,20 @@
 const PRODUCTS_CACHE_TTL_MS = 60 * 1000;
-const PRODUCT_CREATE_TIMEOUT_MS = 30000;
 
 let productsCache = null;
 let cacheTimestamp = 0;
 let inFlightProductsPromise = null;
 
-function getApiBaseUrl() {
-  const envBase = (import.meta.env.VITE_API_URL || "").trim();
-  if (envBase) {
-    return envBase.replace(/\/$/, "");
-  }
-
-  return import.meta.env.PROD ? "" : "";
-}
-
-function buildApiUrl(path) {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const base = getApiBaseUrl();
-  return `${base}${normalizedPath}`;
-}
-
 const REVIEW_LIST_ENDPOINTS = [
-  (productId) => buildApiUrl(`/api/v1/products/${productId}/reviews`),
-  (productId) => buildApiUrl(`/api/v1/reviews?product=${productId}`),
+  (productId) =>
+    `${import.meta.env.VITE_API_URL}/api/v1/products/${productId}/reviews`,
+  (productId) =>
+    `${import.meta.env.VITE_API_URL}/api/v1/reviews?product=${productId}`,
 ];
 
 const REVIEW_CREATE_ENDPOINTS = [
-  (productId) => buildApiUrl(`/api/v1/products/${productId}/reviews`),
-  () => buildApiUrl("/api/v1/reviews"),
+  (productId) =>
+    `${import.meta.env.VITE_API_URL}/api/v1/products/${productId}/reviews`,
+  () => `${import.meta.env.VITE_API_URL}/api/v1/reviews`,
 ];
 
 function sleep(ms) {
@@ -99,7 +86,9 @@ export async function getProductsList({ forceRefresh = false } = {}) {
   }
 
   inFlightProductsPromise = (async () => {
-    const res = await fetchWith429Retry(buildApiUrl("/api/v1/products"));
+    const res = await fetchWith429Retry(
+      `${import.meta.env.VITE_API_URL}/api/v1/products`,
+    );
 
     if (!res.ok) {
       throw new Error(`Failed to fetch products (status ${res.status})`);
@@ -129,48 +118,34 @@ export async function createProduct({ formData, token }) {
     throw new Error("Invalid product payload");
   }
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(
-    () => controller.abort(),
-    PRODUCT_CREATE_TIMEOUT_MS,
-  );
-
-  try {
-    const response = await fetch(buildApiUrl("/api/v1/products/"), {
+  const response = await fetchWith429Retry(
+    `${import.meta.env.VITE_API_URL}/api/v1/products/`,
+    {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
       },
       body: formData,
-      signal: controller.signal,
-    });
+    },
+  );
 
-    const payload = await parseJsonSafe(response);
+  const payload = await parseJsonSafe(response);
 
-    if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
-        throw new Error("You are not allowed to add products");
-      }
-
-      throw new Error(
-        payload?.message ||
-          `Failed to create product (status ${response.status})`,
-      );
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("You are not allowed to add products");
     }
 
-    productsCache = null;
-    cacheTimestamp = 0;
-
-    return payload;
-  } catch (error) {
-    if (error?.name === "AbortError") {
-      throw new Error("Product creation timed out. Please try again.");
-    }
-
-    throw error;
-  } finally {
-    clearTimeout(timeoutId);
+    throw new Error(
+      payload?.message ||
+        `Failed to create product (status ${response.status})`,
+    );
   }
+
+  productsCache = null;
+  cacheTimestamp = 0;
+
+  return payload;
 }
 
 export async function getProductReviews(productId) {

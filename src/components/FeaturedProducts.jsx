@@ -7,6 +7,15 @@ import { useWishlist } from "../context/WishListContext";
 import ProductReviewModal from "./ProductReviewModal";
 import { getProductsList } from "../utils/productsApi";
 
+const PRODUCT_FALLBACK_IMAGE = "https://placehold.co/300x250?text=No+Image";
+
+function getSafeProductImage(product) {
+  const image = product?.images?.[0];
+  return typeof image === "string" && image.trim()
+    ? image
+    : PRODUCT_FALLBACK_IMAGE;
+}
+
 function IconHeart() {
   return (
     <svg
@@ -177,11 +186,11 @@ function FeaturedProducts() {
                 }}
               >
                 <img
-                  src={product.images?.[0]}
+                  src={getSafeProductImage(product)}
                   alt={product.name}
                   className="h-full object-contain"
                   onError={(e) => {
-                    e.target.src = "https://placehold.co/300x250?text=No+Image";
+                    e.target.src = PRODUCT_FALLBACK_IMAGE;
                   }}
                 />
 

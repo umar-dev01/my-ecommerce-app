@@ -4,6 +4,16 @@ import { useWishlist } from "../context/WishListContext";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Cart from "../pages/Cart";
+
+const PRODUCT_CARD_FALLBACK_IMAGE =
+  "https://placehold.co/300x200?text=No+Image";
+
+function getSafeProductCardImage(image) {
+  return typeof image === "string" && image.trim()
+    ? image
+    : PRODUCT_CARD_FALLBACK_IMAGE;
+}
+
 function ProductCard({ id, name, price, image }) {
   const { dispatch, ACTIONS } = useContext(CartContext);
   // const [isWishlisted, setIsWishlisted] = useState(false);
@@ -26,7 +36,7 @@ function ProductCard({ id, name, price, image }) {
   function handleAddToCart() {
     dispatch({
       type: ACTIONS.ADD_ITEM,
-      payload: { id, name, price, image },
+      payload: { id, name, price, image: getSafeProductCardImage(image) },
     });
     console.log(`Added ${name} to cart`);
   }
@@ -37,13 +47,13 @@ function ProductCard({ id, name, price, image }) {
   return (
     <div className="border rounded-lg p-4 shadow-md hover:shadow-lg transition">
       <img
-        src={image}
+        src={getSafeProductCardImage(image)}
         alt={name}
         className="w-full h-48 object-cover rounded cursor-pointer" // ← added cursor-pointer
         onClick={handleViewDetails}
         onError={(e) => {
           e.target.onError = null; // ← stops the loop immediately
-          e.target.src = "https://placehold.co/300x200?text=No+Image";
+          e.target.src = PRODUCT_CARD_FALLBACK_IMAGE;
         }}
       />
       <h3 className="text-xl font-bold mt-2">{name}</h3>

@@ -112,15 +112,12 @@ function AddProduct() {
             </div>
           ) : null}
 
-          <div className={isSubmitting ? "pointer-events-none opacity-70" : ""}>
-            <ProductForm onSubmit={handleCreateProduct} />
+          <div className={isSubmitting ? "opacity-70" : ""}>
+            <ProductForm
+              onSubmit={handleCreateProduct}
+              isSubmitting={isSubmitting}
+            />
           </div>
-
-          {isSubmitting ? (
-            <p className="font-lato text-sm text-gray-500 mt-4">
-              Creating product...
-            </p>
-          ) : null}
         </div>
       </div>
     </div>

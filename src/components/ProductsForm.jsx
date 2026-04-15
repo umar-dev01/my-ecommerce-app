@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function ProductForm({ onSubmit, initialData }) {
+function ProductForm({ onSubmit, initialData, isSubmitting = false }) {
   const [productData, setProductData] = useState(
     initialData || {
       name: "",
@@ -36,7 +36,7 @@ function ProductForm({ onSubmit, initialData }) {
       formData.append("images", image);
     });
 
-    onSubmit(formData);
+    await onSubmit(formData);
   };
 
   return (
@@ -50,6 +50,7 @@ function ProductForm({ onSubmit, initialData }) {
           onChange={(e) =>
             setProductData({ ...productData, name: e.target.value })
           }
+          disabled={isSubmitting}
           className="w-full border px-4 py-2"
           required
         />
@@ -64,6 +65,7 @@ function ProductForm({ onSubmit, initialData }) {
           onChange={(e) =>
             setProductData({ ...productData, price: e.target.value })
           }
+          disabled={isSubmitting}
           className="w-full border px-4 py-2"
           required
         />
@@ -78,6 +80,7 @@ function ProductForm({ onSubmit, initialData }) {
           onChange={(e) =>
             setProductData({ ...productData, category: e.target.value })
           }
+          disabled={isSubmitting}
           className="w-full border px-4 py-2"
           required
         />
@@ -91,6 +94,7 @@ function ProductForm({ onSubmit, initialData }) {
           onChange={(e) =>
             setProductData({ ...productData, description: e.target.value })
           }
+          disabled={isSubmitting}
           className="w-full border px-4 py-2"
           rows="4"
           required
@@ -106,6 +110,7 @@ function ProductForm({ onSubmit, initialData }) {
           onChange={(e) =>
             setProductData({ ...productData, stock: e.target.value })
           }
+          disabled={isSubmitting}
           className="w-full border px-4 py-2"
           required
         />
@@ -119,6 +124,7 @@ function ProductForm({ onSubmit, initialData }) {
           accept="image/*"
           multiple
           onChange={handleImageSelect}
+          disabled={isSubmitting}
           className="w-full border px-4 py-2"
         />
 
@@ -139,9 +145,10 @@ function ProductForm({ onSubmit, initialData }) {
 
       <button
         type="submit"
-        className="bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700"
+        disabled={isSubmitting}
+        className="rounded bg-pink-600 px-6 py-2 text-white transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Create Product
+        {isSubmitting ? "Creating Product..." : "Create Product"}
       </button>
     </form>
   );
