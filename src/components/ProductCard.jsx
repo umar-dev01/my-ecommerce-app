@@ -4,14 +4,16 @@ import { useWishlist } from "../context/WishListContext";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Cart from "../pages/Cart";
-
+const BASE_URL = import.meta.env.VITE_API_URL;
 const PRODUCT_CARD_FALLBACK_IMAGE =
   "https://placehold.co/300x200?text=No+Image";
 
 function getSafeProductCardImage(image) {
-  return typeof image === "string" && image.trim()
-    ? image
-    : PRODUCT_CARD_FALLBACK_IMAGE;
+  if (typeof image !== "string" || !image.trim()) {
+    return PRODUCT_CARD_FALLBACK_IMAGE;
+  }
+  if (image.startsWith("http")) return image; // already full URL
+  return `${BASE_URL}${image}`; // e.g. http://localhost:5000/images/products/...
 }
 
 function ProductCard({ id, name, price, image }) {

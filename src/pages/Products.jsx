@@ -7,6 +7,16 @@ import Sidebar from "../components/sidebar";
 import ProductReviewModal from "../components/ProductReviewModal";
 import { getProductsList } from "../utils/productsApi";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
+function getImageUrl(imagePath) {
+  if (!imagePath || typeof imagePath !== "string") {
+    return "https://placehold.co/300x200?text=No+Image";
+  }
+  if (imagePath.startsWith("http")) return imagePath;
+  return `${BASE_URL}${imagePath}`;
+}
+
 function IconHeart() {
   return (
     <svg
@@ -110,7 +120,7 @@ function Products() {
         id: product._id,
         name: product.name,
         price: product.price,
-        image: product.images?.[0],
+        image: getImageUrl(product.images?.[0]),
       },
     });
   }
@@ -309,7 +319,7 @@ function Products() {
                     onClick={() => navigate(`/products/${product._id}`)}
                   >
                     <img
-                      src={product.images?.[0]}
+                      src={getImageUrl(product.images?.[0])}
                       alt={product.name}
                       className="h-full object-contain group-hover:scale-105 transition duration-300"
                       onError={(e) => {
@@ -398,14 +408,14 @@ function Products() {
                           } else {
                             dispatch({
                               type: ACTIONS.ADD_ITEM,
-                              payload: {
-                                id: product._id,
-                                name: product.name,
-                                price: product.price,
-                                image: product.images?.[0],
-                              },
-                            });
-                          }
+                            payload: {
+                              id: product._id,
+                              name: product.name,
+                              price: product.price,
+                              image: getImageUrl(product.images?.[0]),
+                            },
+                          });
+                        }
                         }}
                         className={`font-josefin text-xs px-4 py-2 transition ${
                           isProductInCart(product._id)
