@@ -7,13 +7,22 @@ import { useWishlist } from "../context/WishListContext";
 import ProductReviewModal from "./ProductReviewModal";
 import { getProductsList } from "../utils/productsApi";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
 const PRODUCT_FALLBACK_IMAGE = "https://placehold.co/300x250?text=No+Image";
 
 function getSafeProductImage(product) {
   const image = product?.images?.[0];
-  return typeof image === "string" && image.trim()
-    ? image
-    : PRODUCT_FALLBACK_IMAGE;
+
+  if (!image) return PRODUCT_FALLBACK_IMAGE;
+
+  const value =
+    typeof image === "string"
+      ? image
+      : image.url || image.secure_url || image.path || "";
+
+  if (!value) return PRODUCT_FALLBACK_IMAGE;
+  if (value.startsWith("http")) return value;
+  return `${BASE_URL}${value}`;
 }
 
 function IconHeart() {
@@ -150,7 +159,7 @@ function FeaturedProducts() {
 
   return (
     <section className="py-16 px-8 bg-white">
-      <div className="container mx-auto">
+      <div className="mx-auto w-full">
         {/* Title Section */}
         <div className="text-center mb-8">
           {/* Carousel Dots */}
@@ -172,7 +181,7 @@ function FeaturedProducts() {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4 md:gap-5">
           {products.map((product) => (
             <div
               key={product._id}
@@ -180,7 +189,7 @@ function FeaturedProducts() {
             >
               {/* Image Section */}
               <div
-                className="h-64 flex items-center justify-center p-6 bg-gray-50 cursor-pointer hover:bg-gray-100 transition relative"
+                className="h-48 md:h-52 flex items-center justify-center p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition relative"
                 onClick={() => {
                   navigate(`/products/${product._id}`);
                 }}
@@ -247,7 +256,7 @@ function FeaturedProducts() {
               </div>
 
               {/* Product Info Section */}
-              <div className="p-6 bg-white text-center border-t border-gray-100">
+              <div className="p-4 bg-white text-center border-t border-gray-100">
                 {/* Product Name in Pink */}
                 <h3
                   onClick={() => {
@@ -288,7 +297,7 @@ function FeaturedProducts() {
                       });
                     }
                   }}
-                  className={`w-full font-josefin py-2 mt-4 transition text-sm font-semibold ${
+                  className={`w-full font-josefin py-2 mt-3 transition text-sm font-semibold ${
                     isProductInCart(product._id)
                       ? "bg-red-500 text-white hover:bg-red-600"
                       : "bg-pink-500 text-white hover:bg-pink-700"

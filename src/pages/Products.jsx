@@ -230,7 +230,7 @@ function Products() {
     <div className="min-h-screen bg-gray-50">
       {/* ── Page Header ── */}
       <div className="bg-hlight py-10 px-8">
-        <div className="container mx-auto">
+        <div className="mx-auto w-full">
           <h1 className="font-josefin text-4xl font-bold text-hdark mb-2">
             All Products
           </h1>
@@ -239,7 +239,7 @@ function Products() {
       </div>
 
       {/* ── Main Content ── */}
-      <div className="container mx-auto px-8 py-10">
+      <div className="mx-auto w-full px-8 py-10">
         {/* Search + Sort Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
           {/* Search */}
@@ -307,7 +307,7 @@ function Products() {
             )}
 
             {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4 md:gap-5">
               {filteredProducts.map((product) => (
                 <div
                   key={product._id}
@@ -315,7 +315,7 @@ function Products() {
                 >
                   {/* Image */}
                   <div
-                    className="h-56 bg-hlight flex items-center justify-center p-4 cursor-pointer overflow-hidden relative"
+                    className="h-44 md:h-48 bg-hlight flex items-center justify-center p-3 cursor-pointer overflow-hidden relative"
                     onClick={() => navigate(`/products/${product._id}`)}
                   >
                     <img
@@ -408,14 +408,14 @@ function Products() {
                           } else {
                             dispatch({
                               type: ACTIONS.ADD_ITEM,
-                            payload: {
-                              id: product._id,
-                              name: product.name,
-                              price: product.price,
-                              image: getImageUrl(product.images?.[0]),
-                            },
-                          });
-                        }
+                              payload: {
+                                id: product._id,
+                                name: product.name,
+                                price: product.price,
+                                image: getImageUrl(product.images?.[0]),
+                              },
+                            });
+                          }
                         }}
                         className={`font-josefin text-xs px-4 py-2 transition ${
                           isProductInCart(product._id)

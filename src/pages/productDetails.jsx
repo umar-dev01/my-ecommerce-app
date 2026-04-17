@@ -6,10 +6,20 @@ import { useWishlist } from "../context/WishListContext";
 import ProductReviewModal from "../components/ProductReviewModal";
 import { getProductReviews } from "../utils/productsApi";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+const PRODUCT_FALLBACK_IMAGE =
+  "https://via.placeholder.com/800x900?text=Product+Image";
+
 function normalizeImageUrl(image) {
   if (!image) return "";
-  if (typeof image === "string") return image;
-  return image.url || image.secure_url || image.path || "";
+  const value =
+    typeof image === "string"
+      ? image
+      : image.url || image.secure_url || image.path || "";
+
+  if (!value) return "";
+  if (value.startsWith("http")) return value;
+  return `${BASE_URL}${value}`;
 }
 
 function ReviewIcon() {
@@ -65,8 +75,7 @@ function ProductDetails() {
   const productImages = (product?.images || [])
     .map(normalizeImageUrl)
     .filter(Boolean);
-  const fallbackImage =
-    "https://via.placeholder.com/800x900?text=Product+Image";
+  const fallbackImage = PRODUCT_FALLBACK_IMAGE;
   const mainImage = selectedImage || productImages[0] || fallbackImage;
   const cartImage = productImages[0] || fallbackImage;
   const isProductInCart = cart.items.some(
@@ -185,9 +194,18 @@ function ProductDetails() {
           ← Back to Products
         </button>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.15fr]">
-          <div className="order-2 lg:order-1">
-            <div className="mb-6 flex gap-3 overflow-x-auto pb-2">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.25fr_0.95fr] lg:items-start">
+          <div className="order-1 lg:order-1">
+            <div className="flex min-h-[420px] items-center justify-center overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 md:min-h-[560px] lg:min-h-[680px]">
+              <img
+                src={mainImage}
+                alt={product.name}
+                className="max-h-[380px] w-auto max-w-full rounded-xl object-contain md:max-h-[520px] lg:max-h-[640px]"
+                style={{ imageRendering: "auto" }}
+              />
+            </div>
+
+            <div className="mt-6 flex gap-3 overflow-x-auto pb-2">
               {(productImages.length ? productImages : [fallbackImage]).map(
                 (image, index) => {
                   const isActive = image === mainImage;
@@ -205,14 +223,17 @@ function ProductDetails() {
                       <img
                         src={image}
                         alt={`${product.name} view ${index + 1}`}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-contain bg-white"
+                        loading="lazy"
                       />
                     </button>
                   );
                 },
               )}
             </div>
+          </div>
 
+          <div className="order-2 lg:order-1">
             <h1 className="mb-2 text-4xl font-josefin font-bold text-hdark">
               {product.name}
             </h1>
@@ -294,16 +315,6 @@ function ProductDetails() {
                 <span className="font-semibold">Share:</span> Facebook •
                 Instagram • Twitter
               </p>
-            </div>
-          </div>
-
-          <div className="order-1 lg:order-2">
-            <div className="overflow-hidden rounded-lg bg-[#f6f7fb] p-3">
-              <img
-                src={mainImage}
-                alt={product.name}
-                className="h-[320px] w-full rounded-md object-cover md:h-[520px]"
-              />
             </div>
           </div>
         </div>

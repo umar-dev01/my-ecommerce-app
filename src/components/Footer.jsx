@@ -17,9 +17,13 @@ function Footer() {
     <footer className="border-t border-gray-200 bg-white pt-12">
       <Container className="pb-8">
         <div className="rounded-[1.5rem] border border-gray-100 bg-white px-6 py-8 sm:px-8 lg:px-10">
-          <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1.1fr]">
-            <div className="max-w-sm">
-              <img src="/images/hekto-logo.png" alt="Hekto" className="mb-5 h-9" />
+          <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[1.2fr_0.8fr_0.8fr_1.1fr]">
+            <div className="max-w-sm md:col-span-2 xl:col-span-1">
+              <img
+                src="/images/hekto-logo.png"
+                alt="Hekto"
+                className="mb-5 h-9"
+              />
               <p className="mb-6 font-lato text-sm leading-7 text-gray-500 sm:text-base">
                 Curated furniture and decor made to bring softness, comfort, and
                 character into every corner of your home.
@@ -109,7 +113,7 @@ function Footer() {
               </ul>
             </div>
 
-            <div className="rounded-[1.25rem] bg-hlight p-5 sm:p-6">
+            <div className="rounded-[1.25rem] bg-hlight p-5 sm:p-6 md:col-span-2 xl:col-span-1">
               <h3 className="mb-3 font-josefin text-xl font-bold text-hdark">
                 Newsletter
               </h3>
@@ -138,7 +142,7 @@ function Footer() {
                 </div>
               </form>
               <p className="mt-4 font-lato text-xs text-gray-500">
-                Contact us: umr7905@gmail.com
+                Contact us: umj7905@gmail.com
               </p>
             </div>
           </div>

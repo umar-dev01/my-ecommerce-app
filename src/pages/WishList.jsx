@@ -26,7 +26,7 @@ function Wishlist() {
     <div className="min-h-screen bg-gray-50">
       {/* Page Header */}
       <div className="bg-hlight py-10 px-8">
-        <div className="container mx-auto">
+        <div className="mx-auto w-full">
           <h1 className="font-josefin text-4xl font-bold text-hdark mb-2">
             My Wishlist
           </h1>
@@ -35,7 +35,7 @@ function Wishlist() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-8 py-10">
+      <div className="mx-auto w-full px-8 py-10">
         {/* Loading */}
         {isLoading && (
           <div className="flex justify-center py-20">
@@ -79,14 +79,14 @@ function Wishlist() {
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4 md:gap-5">
               {wishlist.map((item) => {
                 const product = item.product || item;
                 return (
                   <div key={product._id} className="bg-white shadow-sm group">
                     {/* Product Image */}
                     <div
-                      className="h-56 bg-hlight flex items-center justify-center p-4 cursor-pointer relative"
+                      className="h-44 md:h-48 bg-hlight flex items-center justify-center p-3 cursor-pointer relative"
                       onClick={() => navigate(`/products/${product._id}`)}
                     >
                       <img
