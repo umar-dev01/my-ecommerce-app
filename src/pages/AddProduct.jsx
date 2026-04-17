@@ -17,7 +17,7 @@ function AddProduct() {
 
   const isAdmin = useMemo(() => {
     const role = (user?.role || "").toLowerCase();
-    return role === "admin" || role === "seller" || role === "manager";
+    return role === "admin";
   }, [user?.role]);
 
   async function handleCreateProduct(formData) {
