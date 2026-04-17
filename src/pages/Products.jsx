@@ -5,7 +5,7 @@ import { AuthContext } from "../context/AuthContext";
 import { useWishlist } from "../context/WishListContext";
 import Sidebar from "../components/sidebar";
 import ProductReviewModal from "../components/ProductReviewModal";
-import { getProductsList } from "../utils/productsApi";
+import { deleteProduct, getProductsList } from "../utils/productsApi";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -73,20 +73,47 @@ function IconReview() {
   );
 }
 
+function IconTrash() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <path d="M6 6l1 14h10l1-14" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+    </svg>
+  );
+}
+
 function Products() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [actionError, setActionError] = useState("");
+  const [deletingProductId, setDeletingProductId] = useState(null);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("default");
   const [activeReviewProduct, setActiveReviewProduct] = useState(null);
 
   const { cart, dispatch, ACTIONS } = useContext(CartContext);
-  const { isAuthenticated } = useContext(AuthContext);
+  const { user, isAuthenticated, token } = useContext(AuthContext);
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const isAdmin = useMemo(
+    () => (user?.role || "").toLowerCase() === "admin",
+    [user?.role],
+  );
 
   function handleWishlistClick(e, productId) {
     e.stopPropagation();
@@ -123,6 +150,46 @@ function Products() {
         image: getImageUrl(product.images?.[0]),
       },
     });
+  }
+
+  async function handleDeleteProduct(e, product) {
+    e.stopPropagation();
+
+    if (!isAdmin) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Delete ${product.name}? This cannot be undone.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeletingProductId(product._id);
+      setActionError("");
+
+      await deleteProduct({ productId: product._id, token });
+
+      setProducts((currentProducts) =>
+        currentProducts.filter(
+          (item) => String(item._id) !== String(product._id),
+        ),
+      );
+
+      if (
+        activeReviewProduct &&
+        String(activeReviewProduct._id) === String(product._id)
+      ) {
+        setActiveReviewProduct(null);
+      }
+    } catch (err) {
+      setActionError(err.message || "Unable to delete product");
+    } finally {
+      setDeletingProductId(null);
+    }
   }
 
   // ─── Fetch all products ────────────────────────────
@@ -288,6 +355,12 @@ function Products() {
               {search && <span> for "{search}"</span>}
             </p>
 
+            {actionError ? (
+              <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-lato text-sm text-red-700">
+                {actionError}
+              </p>
+            ) : null}
+
             {/* No Results */}
             {filteredProducts.length === 0 && (
               <div className="text-center py-20">
@@ -377,6 +450,19 @@ function Products() {
                       >
                         <IconReview />
                       </button>
+
+                      {isAdmin ? (
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeleteProduct(e, product)}
+                          disabled={deletingProductId === product._id}
+                          className="text-red-500 transition hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+                          aria-label="Delete product"
+                          title="Delete"
+                        >
+                          <IconTrash />
+                        </button>
+                      ) : null}
                     </div>
                   </div>
 

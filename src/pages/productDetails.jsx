@@ -4,7 +4,7 @@ import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { useWishlist } from "../context/WishListContext";
 import ProductReviewModal from "../components/ProductReviewModal";
-import { getProductReviews } from "../utils/productsApi";
+import { deleteProduct, getProductReviews } from "../utils/productsApi";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 const PRODUCT_FALLBACK_IMAGE =
@@ -41,6 +41,27 @@ function ReviewIcon() {
   );
 }
 
+function TrashIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <path d="M6 6l1 14h10l1-14" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+    </svg>
+  );
+}
+
 function formatReviewDate(value) {
   if (!value) return "";
 
@@ -58,7 +79,7 @@ function renderStars(rating) {
 
 function ProductDetails() {
   const { cart, dispatch, ACTIONS } = useContext(CartContext);
-  const { isAuthenticated } = useContext(AuthContext);
+  const { user, isAuthenticated, token } = useContext(AuthContext);
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -70,6 +91,8 @@ function ProductDetails() {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsError, setReviewsError] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const productId = product?._id || product?.id || id;
   const productImages = (product?.images || [])
@@ -93,6 +116,10 @@ function ProductDetails() {
 
     return { count: reviews.length, average };
   }, [reviews]);
+  const isAdmin = useMemo(
+    () => (user?.role || "").toLowerCase() === "admin",
+    [user?.role],
+  );
 
   function handleWishlistClick() {
     if (!isAuthenticated) {
@@ -117,6 +144,28 @@ function ProductDetails() {
       setReviewsError(err.message || "Failed to load reviews");
     } finally {
       setReviewsLoading(false);
+    }
+  }
+
+  async function handleDeleteProduct() {
+    const confirmed = window.confirm(
+      `Delete ${product.name}? This cannot be undone.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      setDeleteError("");
+
+      await deleteProduct({ productId: productId, token });
+      navigate("/products");
+    } catch (err) {
+      setDeleteError(err.message || "Unable to delete product");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -298,7 +347,24 @@ function ProductDetails() {
               >
                 {inWishlist ? "♥" : "♡"}
               </button>
+
+              {isAdmin ? (
+                <button
+                  type="button"
+                  onClick={handleDeleteProduct}
+                  disabled={isDeleting}
+                  className="rounded-md border border-red-200 bg-red-50 px-5 py-3 font-josefin text-base font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isDeleting ? "Deleting..." : "Delete Product"}
+                </button>
+              ) : null}
             </div>
+
+            {deleteError ? (
+              <p className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-lato text-sm text-red-700">
+                {deleteError}
+              </p>
+            ) : null}
 
             <div className="space-y-3 font-josefin text-hdark">
               <p>

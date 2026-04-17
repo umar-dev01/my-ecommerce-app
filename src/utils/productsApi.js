@@ -148,6 +148,44 @@ export async function createProduct({ formData, token }) {
   return payload;
 }
 
+export async function deleteProduct({ productId, token }) {
+  if (!token) {
+    throw new Error("Login required to delete a product");
+  }
+
+  if (!productId) {
+    throw new Error("Invalid product id");
+  }
+
+  const response = await fetchWith429Retry(
+    `${import.meta.env.VITE_API_URL}/api/v1/products/${productId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  const payload = await parseJsonSafe(response);
+
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("You are not allowed to delete products");
+    }
+
+    throw new Error(
+      payload?.message ||
+        `Failed to delete product (status ${response.status})`,
+    );
+  }
+
+  productsCache = null;
+  cacheTimestamp = 0;
+
+  return payload;
+}
+
 export async function getProductReviews(productId) {
   if (!productId) return [];
 
